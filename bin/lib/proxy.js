@@ -33,7 +33,7 @@ const currentRegion = REGIONS[REGION];
 const REGION_SHORT = REGION.toLowerCase().split('-')[0];
 const isConsole = currentRegion["console"];
 const { customServers, listenHostname, hostname } = currentRegion;
-const altHostnames = currentRegion.altHostnames || [];
+const hostnames = [].concat(hostname, currentRegion.altHostnames || []);
 const fs = require("fs");
 const path = require("path");
 
@@ -77,12 +77,16 @@ catch (_) {}
 const net = require("net");
 const dns = require("dns");
 const hosts = require("./hosts");
+const ProcessListener = require("./process-listener");
+
+function removeHosts() {
+  for (let x of hostnames)
+    hosts.remove(listenHostname, x);
+}
 
 if (!isConsole) {
   try {
-    hosts.remove(listenHostname, hostname);
-    for (let x of altHostnames)
-      hosts.remove(listenHostname, x);
+    removeHosts();
   } catch (e) {
     switch (e.code) {
      case "EACCES":
@@ -156,11 +160,13 @@ function listenHandler(err) {
   }
 
   if (!isConsole) {
-    hosts.set(listenHostname, hostname);
-    for (let x of altHostnames)
-      hosts.set(listenHostname, x);
+    ProcessListener("TERA.exe", () => {
+      for (let x of hostnames)
+        hosts.set(listenHostname, x);
 
-    console.log("[sls] server list overridden");
+      console.log("[sls] server list overridden");
+      setTimeout(removeHosts, 1000*60*2);
+    }, removeHosts, 5000);
   }
 
   for (let i = servers.entries(), step; !(step = i.next()).done; ) {
@@ -391,9 +397,7 @@ function cleanExit() {
 
   if(!isConsole) {
     try {
-      hosts.remove(listenHostname, hostname);
-      for (let x of altHostnames)
-        hosts.remove(listenHostname, x);
+      removeHosts();
     }
     catch (_) {}
 
