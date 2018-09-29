@@ -8,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 
 const TeraProxyAutoUpdateServers = ["https://raw.githubusercontent.com/tera-lab/tera-proxy/master/"];
-const DiscordURL = "https://tinyurl.com/caaliproxy";
+const DiscordURL = "https://tinyurl.com/caalitera";
 
 function forcedirSync(dir) {
   const sep = path.sep;
