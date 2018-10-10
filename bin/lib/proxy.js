@@ -54,6 +54,11 @@ if (!currentRegion) {
         migratedFile = "res/servers-th.json";
       break;
     }
+    case "JP": {
+      if (!currentRegion.customServers["5073"])
+        migratedFile = "res/servers-jp.json";
+      break;
+    }
   }
 
   if (migratedFile) {
@@ -204,6 +209,7 @@ function runServ(target, socket) {
   const { Connection, RealClient } = require("tera-proxy-game");
 
   const connection = new Connection({
+    "region": REGION_SHORT,
     "console": !!isConsole,
     "classic": !!currentRegion["classic"],
     "protocol_data": lastUpdateResult["protocol_data"],
