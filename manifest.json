@@ -3,7 +3,7 @@
     "bin/lib/hosts.js": "e554c3d2593be08afc60f3db74ca96644c7b267e12d546cfbf5ef61c965da99a",
     "bin/lib/netstat.js": "2b7b5c825c82833403684545fc9b9cfc57cb878fa782bbde860805984119b6cb",
     "bin/lib/process-listener.js": "f3bd58d29950000dc864f3bce1bb910389de2281a798461e675e5200a2c5e6c7",
-    "bin/lib/proxy.js": "29ffc08b615a262b7a16e18d1ade781e23e503aaeab908017c956c0b40e86885",
+    "bin/lib/proxy.js": "173774414e90d5d83cdb3a7f81ed4522b5d82594dc816f9ec582844eb446da43",
     "bin/lib/regions.js": "52fe5323b8912dbd5f793a4f6477e24ccd3cc59f1871a73c95a16793e534d46c",
     "bin/lib/update.js": "7d6c38813d798a640e0484fab3fe00f7e0a9287131f4f1587141032f897e89d3",
     "bin/lib/update-self.js": "71e3308ff60bb091ca0609bfaea271b07d083c85d16424da021a999111dafd09",

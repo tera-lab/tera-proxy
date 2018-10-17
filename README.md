@@ -4,6 +4,7 @@ This software in this repository does not work in combination with the NA versio
 ### Fork of Meishuu's/Pinkie Pie's tera-proxy with built-in support for automatic updates
 * It will auto-update your opcode mappings, packet definitions, and compatible installed modules. You no longer need do manually update _anything_!
 * Feel free to visit my Discord server at https://discord.gg/dUNDDtw
+* Originally forked from https://github.com/pinkipi/tera-proxy which was DMCA'd by EME.
 
 ### Installation instructions
 * Download and run the setup from the #proxy channel in the Slack server linked above. A manual installation is possible, but not recommended!
@@ -53,7 +54,6 @@ Almost all tera-proxy modules are compatible with my proxy. For an always up-to-
 * [TCC Stub](https://github.com/Foglio1024/tcc-stub)
 * [Box](https://github.com/ayylmar/box)
 * [Generic Box Opener / Item User](https://github.com/Owyn/generic-box-opener-item-user)
-* [Event Stars Cooldown Fix](https://github.com/ayylmar/fix-event-stars-cooldown)
 * [Abnormality Blocker](https://github.com/ayylmar/abnormality-blocker)
 * [Improved LFG](https://github.com/ayylmar/improved-lfg)
 * [No More Death Animations](https://github.com/ayylmar/no-more-death-animations)
