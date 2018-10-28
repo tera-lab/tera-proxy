@@ -16,7 +16,7 @@ This software in this repository does not work in combination with the NA versio
 Almost all tera-proxy modules are compatible with my proxy. For an always up-to-date list, check out [my Discord server](https://discord.gg/dUNDDtw)!
 * [Skill Prediction (SaltyMonkey's fork, included with the proxy by default)](https://github.com/SaltyMonkey/skill-prediction)
 * [FPS Utils (included with the proxy by default)](https://github.com/codeagon/fps-utils)
-* [Arborean Apparel](https://github.com/codeagon/arborean-apparel)
+* [Arborean Apparel](https://github.com/iribae/arborean-apparel/)
 * [Astral Tera](https://github.com/codeagon/Astral-TERA)
 * [True Everful Nostrum (my fork)](https://github.com/caali-hackerman/true-everful-nostrum)
 * [Instant Soulbind](https://github.com/beng-mods/instant-soulbind)
@@ -59,7 +59,7 @@ Almost all tera-proxy modules are compatible with my proxy. For an always up-to-
 * [No More Death Animations](https://github.com/ayylmar/no-more-death-animations)
 * [Infinity Journal (JustPassingBy's fork)](https://github.com/ayylmar/infinity-journal)
 * [Antaroth's Abyss Guide](https://github.com/Owyn/aaguide)
-* [Tera-Guide](https://github.com/Kaseaa/tera-guide)
+* [Tera-Guide](https://github.com/Kaseaa/tera-guide) (unmaintained)
 * [Mongord](https://github.com/soler91/mongord)
 * [No Drunk Screen](https://github.com/codeagon/no-drunk-screen)
 * [Hide Dmg](https://github.com/soler91/hide-dmg)
@@ -77,7 +77,8 @@ Almost all tera-proxy modules are compatible with my proxy. For an always up-to-
 * [Mount Prediction](https://github.com/Snugglez/mount-prediction)
 * [No More Wasted Grim Strikes](https://github.com/Owyn/no_more_wasted_grim-strikes)
 * [Rainbow](https://github.com/codeagon/rainbow)
-* [Demon's Wheel Guide (my fork)](https://github.com/caali-hackerman/dw-guide/blob/master/README.md)
+* [Demon's Wheel Guide (my fork)](https://github.com/caali-hackerman/dw-guide)
+* [Grotto of Lost Souls Guide](https://github.com/valkyr1e-tera/gls-guide)
 * Bern's scripts
 * Kasea's Ping Remover
 * ... and many more
