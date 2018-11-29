@@ -1,3 +1,4 @@
+// Imports
 let request = null;
 try {
   request = require('request-promise-native');
@@ -10,6 +11,15 @@ const path = require("path");
 const TeraProxyAutoUpdateServers = ["https://raw.githubusercontent.com/tera-lab/tera-proxy/master/"];
 const DiscordURL = "https://discord.gg/dUNDDtw";
 
+// Safely load configuration
+let branch = 'master';
+try {
+  const config = require("../config.json");
+  if(config && config.branch)
+    branch = config.branch.toLowerCase();
+} catch(_) { }
+
+// Implementation
 function forcedirSync(dir) {
   const sep = path.sep;
   const initDir = path.isAbsolute(dir) ? sep : '';
@@ -45,7 +55,7 @@ async function autoUpdateSelf(updatelimit = true, serverIndex = 0) {
   }
 
   try {
-    const manifest = await request({url: TeraProxyAutoUpdateServers[serverIndex] + 'manifest.json', json: true});
+    const manifest = await request({url: TeraProxyAutoUpdateServers[serverIndex] + branch + '/manifest.json', json: true});
     if(!manifest["files"])
       throw "Invalid manifest!";
 
@@ -62,7 +72,7 @@ async function autoUpdateSelf(updatelimit = true, serverIndex = 0) {
         }
       }
       if(needsUpdate) {
-        let promise = autoUpdateFile(file, filepath, TeraProxyAutoUpdateServers[serverIndex] + file);
+        let promise = autoUpdateFile(file, filepath, TeraProxyAutoUpdateServers[serverIndex] + branch + '/' + file);
         promises.push(updatelimit ? (await promise) : promise);
       }
     }
