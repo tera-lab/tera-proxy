@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const fs = require("fs");
 const path = require("path");
 
-const TeraProxyAutoUpdateServers = ["https://raw.githubusercontent.com/tera-lab/tera-proxy/master/"];
+const TeraProxyAutoUpdateServers = ["https://raw.githubusercontent.com/tera-lab/tera-proxy/"];
 const DiscordURL = "https://discord.gg/dUNDDtw";
 
 // Safely load configuration
