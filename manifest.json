@@ -7,24 +7,75 @@
     "bin/lib/regions.js": "33d1d9890e2b3b7759e9b334291de0aa8936172ddc238b91abc5805518207b83",
     "bin/lib/update.js": "7d6c38813d798a640e0484fab3fe00f7e0a9287131f4f1587141032f897e89d3",
     "bin/lib/update-self.js": "3af4ce972b52034165431ba9a2ea841f590ffabed69d243014cba942a83f9a90",
-    "bin/lib/res/servers-eu.json": {"overwrite": false, "hash": "fe961a1205ad1e0cee690e447692b00f82cbda0425878a9a047a5e74297a1374"},
-    "bin/lib/res/servers-eu-test.json": {"overwrite": false, "hash": "dfe01c75882cce6d4454319fbaff9cdf3575c165696d01d4df9e2c8d0fc6f473"},
-    "bin/lib/res/servers-na.json": {"overwrite": false, "hash": "cd4d08a051aec922390de46d712fd8e45011149c4a4cee6b9a1b9955c88aa128"},
+    "bin/lib/res/servers-eu.json": {
+      "overwrite": false,
+      "hash": "fe961a1205ad1e0cee690e447692b00f82cbda0425878a9a047a5e74297a1374"
+    },
+    "bin/lib/res/servers-eu-test.json": {
+      "overwrite": false,
+      "hash": "dfe01c75882cce6d4454319fbaff9cdf3575c165696d01d4df9e2c8d0fc6f473"
+    },
+    "bin/lib/res/servers-na.json": {
+      "overwrite": false,
+      "hash": "cd4d08a051aec922390de46d712fd8e45011149c4a4cee6b9a1b9955c88aa128"
+    },
     "bin/lib/res/servers-jp.json": "f6502cf6c77f769adcc1222559427581e152a6abad7723d444b09a306afeef3c",
-    "bin/lib/res/servers-kr.json": {"overwrite": false, "hash": "d7c276eb311ac4121473da0856dfbf111bf713099755636acd3b4ce5431ad9d9"},
-    "bin/lib/res/servers-kr-test.json": {"overwrite": false, "hash": "46bdf430c8b7b439b66db118265b469c5b0090c1bfeba11f09dc436da36b644b"},
-    "bin/lib/res/servers-ru.json": {"overwrite": false, "hash": "284ce052b52422ed8e43901fcb94d98ef055d352d23fa5b9dadda87d0bd4d8c9"},
-    "bin/lib/res/servers-ru-test.json": {"overwrite": false, "hash": "89cbd37ed8b7efd610bf88aef248946866f269b2dcbfd238cdafeaea0dde8923"},
-    "bin/lib/res/servers-tw.json": {"overwrite": false, "hash": "4189efb922b24cb82919209546ce3119ff59ee3c5cac815f17399f3b786a7631"},
-    "bin/lib/res/servers-th.json": {"overwrite": false, "hash": "0aaf91bf5e0a75ec2bd16fc451c1c72c2152813ea7be9d919f0a98084806b8bd"},
-    "bin/lib/res/servers-se.json": {"overwrite": false, "hash": "24d94a6f10313888a1311cac8636c511ee4ef0eebb7cbf32c5d336bad9767edd"},
-    "bin/lib/res/servers-ps4-eu.json": {"overwrite": false, "hash": "4042486ead0a16dc7afbdf751acd631758e4d871983d86967ff2147db6b30da7"},
-    "bin/lib/res/servers-ps4-na.json": {"overwrite": false, "hash": "4042486ead0a16dc7afbdf751acd631758e4d871983d86967ff2147db6b30da7"},
-    "bin/lib/res/servers-xbone-eu.json": {"overwrite": false, "hash": "4042486ead0a16dc7afbdf751acd631758e4d871983d86967ff2147db6b30da7"},
-    "bin/lib/res/servers-xbone-na.json": {"overwrite": false, "hash": "4042486ead0a16dc7afbdf751acd631758e4d871983d86967ff2147db6b30da7"},
-    "bin/node_modules/command/module.json": {"overwrite": false, "hash": "fa02a4394cba30b50a5c81c3f845a34d3bfd829d28a46f03758b6b85292a0bc6"},
-    "bin/node_modules/tera-game-state/module.json": {"overwrite": false, "hash": "e6f3fb4bf0aa155cac512e56775a111c0d274b1c55bd14e22a513d3beb8924b8"},
-    "bin/node_modules/tera-lab/module.json": {"overwrite": false, "hash": "b911c5ef7f08cbe8ad4239c0d344b43d44d42365a41f8b7eaceaeda88494048f"},
+    "bin/lib/res/servers-kr.json": {
+      "overwrite": false,
+      "hash": "18bbd920f1f4d1ec4acfd27b86d9a44746174c8eb2fed6d182892a2bf32f8585"
+    },
+    "bin/lib/res/servers-kr-test.json": {
+      "overwrite": false,
+      "hash": "46bdf430c8b7b439b66db118265b469c5b0090c1bfeba11f09dc436da36b644b"
+    },
+    "bin/lib/res/servers-ru.json": {
+      "overwrite": false,
+      "hash": "742c9e4bb7617ff83c0bf75cf04f5988aefe3578b8b03217477b6951a623b767"
+    },
+    "bin/lib/res/servers-ru-test.json": {
+      "overwrite": false,
+      "hash": "89cbd37ed8b7efd610bf88aef248946866f269b2dcbfd238cdafeaea0dde8923"
+    },
+    "bin/lib/res/servers-tw.json": {
+      "overwrite": false,
+      "hash": "36b3b25480c3ae1c7153e61015f94fc8b267ab2caf3ef50ba9b25499bf2ced2f"
+    },
+    "bin/lib/res/servers-th.json": {
+      "overwrite": false,
+      "hash": "0aaf91bf5e0a75ec2bd16fc451c1c72c2152813ea7be9d919f0a98084806b8bd"
+    },
+    "bin/lib/res/servers-se.json": {
+      "overwrite": false,
+      "hash": "24d94a6f10313888a1311cac8636c511ee4ef0eebb7cbf32c5d336bad9767edd"
+    },
+    "bin/lib/res/servers-ps4-eu.json": {
+      "overwrite": false,
+      "hash": "4042486ead0a16dc7afbdf751acd631758e4d871983d86967ff2147db6b30da7"
+    },
+    "bin/lib/res/servers-ps4-na.json": {
+      "overwrite": false,
+      "hash": "4042486ead0a16dc7afbdf751acd631758e4d871983d86967ff2147db6b30da7"
+    },
+    "bin/lib/res/servers-xbone-eu.json": {
+      "overwrite": false,
+      "hash": "4042486ead0a16dc7afbdf751acd631758e4d871983d86967ff2147db6b30da7"
+    },
+    "bin/lib/res/servers-xbone-na.json": {
+      "overwrite": false,
+      "hash": "4042486ead0a16dc7afbdf751acd631758e4d871983d86967ff2147db6b30da7"
+    },
+    "bin/node_modules/command/module.json": {
+      "overwrite": false,
+      "hash": "fa02a4394cba30b50a5c81c3f845a34d3bfd829d28a46f03758b6b85292a0bc6"
+    },
+    "bin/node_modules/tera-game-state/module.json": {
+      "overwrite": false,
+      "hash": "e6f3fb4bf0aa155cac512e56775a111c0d274b1c55bd14e22a513d3beb8924b8"
+    },
+    "bin/node_modules/tera-lab/module.json": {
+      "overwrite": false,
+      "hash": "b911c5ef7f08cbe8ad4239c0d344b43d44d42365a41f8b7eaceaeda88494048f"
+    },
     "node_modules/long/package.json": "1da1c0eed6d26d324045c40ad4799ad56e044469dac68c385e0c9ebaae9ef76e",
     "node_modules/long/index.js": "bee4df4d635b89821e35b00ce86d8c2a6c4dbb858d67e4da5aac57bac27d2573",
     "node_modules/tera-data-parser/package.json": "703db3d38930af4e6c38f4a4e449b53e413a66a0314c8f6a60f0e331df699eba",
