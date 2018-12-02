@@ -1,6 +1,6 @@
 {
   "files": {
-    "bin/lib/hosts.js": "e554c3d2593be08afc60f3db74ca96644c7b267e12d546cfbf5ef61c965da99a",
+    "bin/lib/hosts.js": "2d1592299406dc7e0f082c30809236c305226766e4d26afad698899c646a80ed",
     "bin/lib/netstat.js": "2b7b5c825c82833403684545fc9b9cfc57cb878fa782bbde860805984119b6cb",
     "bin/lib/process-listener.js": "f3bd58d29950000dc864f3bce1bb910389de2281a798461e675e5200a2c5e6c7",
     "bin/lib/proxy.js": "17442b8ce1ce95264fc9cca303316fcafce833cfe319f3dbf83cebeada1bde4b",
