@@ -90,6 +90,8 @@ const ProcessListener = require("./process-listener");
 function removeHosts() {
   for (let x of hostnames)
     hosts.remove(listenHostname, x);
+
+  console.log("[sls] server list overridden reverted")
 }
 
 if (!isConsole) {
@@ -146,6 +148,7 @@ function populateModulesList() {
 
 
 const servers = new Map();
+let hostsTimeout = null;
 
 function customServerCallback(server) {
   const { address, port } = server.address();
@@ -173,7 +176,8 @@ function listenHandler(err) {
         hosts.set(listenHostname, x);
 
       console.log("[sls] server list overridden");
-      setTimeout(removeHosts, 1000*60*2);
+      clearTimeout(hostsTimeout)
+      hostsTimeout = setTimeout(removeHosts, 1000*60*2);
     }, removeHosts, 5000);
   }
 
