@@ -1,7 +1,8 @@
 const request = require('request-promise-native');
 const crypto = require('crypto');
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
+const { listModules } = require('tera-proxy-game');
 
 const TeraDataAutoUpdateServer = "https://raw.githubusercontent.com/caali-hackerman/tera-data/master/";
 const DiscordURL = "https://discord.gg/dUNDDtw";
@@ -66,15 +67,23 @@ async function autoUpdateModule(name, root, updateData, updatelog, updatelimit, 
     else if (updatelog)
       console.log("[update] Updating module " + name);
 
-    // TODO FIXME: temporary fix until migration to new github is done!
-    const update_url_root = updateData["servers"][serverIndex].replace('/hackerman-caali/', '/caali-hackerman/');
-    const manifest_url = update_url_root + 'manifest.json';
+    const update_url_root = updateData["servers"][serverIndex];
+    const manifest_file = 'manifest.json';
+    const manifest_url = update_url_root + manifest_file;
+    const manifest_path = path.join(root, manifest_file);
     if(updatelog)
       console.log("[update] - Retrieving update manifest (Server " + serverIndex + ")");
 
-    const manifest = await request({url: manifest_url, qs: {"drmkey": updateData["drmKey"]}, json: true});
-    if(typeof manifest !== 'object')
-      throw "Invalid manifest.json!";
+    let manifest_result = await autoUpdateFile(manifest_file, manifest_path, manifest_url, updateData["drmKey"], null);
+    if(!manifest_result)
+      throw new Error(`Unable to download update manifest for module "${name}":\n${e}`);
+
+    let manifest;
+    try {
+      manifest = JSON.parse(fs.readFileSync(manifest_path, 'utf8'));
+    } catch(e) {
+      throw new Error(`Invalid update manifest for module "${name}":\n${e}`);
+    }
 
     let promises = [];
     for(let file in manifest["files"]) {
@@ -224,108 +233,141 @@ async function autoUpdateMaps(updatelog, updatelimit) {
   return [protocol_data, promises];
 }
 
-async function autoUpdate(moduleBase, modules, updatelog, updatelimit, region) {
+const CoreModules = {
+  "command": "https://raw.githubusercontent.com/caali-hackerman/tera-proxy/master/bin/node_modules/command/module.json",
+  "tera-game-state": "https://raw.githubusercontent.com/caali-hackerman/tera-game-state/master/module.json",
+};
+
+async function autoUpdate(moduleBase, updatelog, updatelimit, region) {
   console.log("[update] Auto-update started!");
   let requiredDefs = new Set(["C_CHECK_VERSION.1.def"]);
 
   let successModules = [];
   let legacyModules = [];
   let failedModules = [];
-  for (let module of modules) {
-    if(!module.endsWith('.js')) {
-      let root = path.join(moduleBase, module);
-      try {
-        let moduleConfigChanged;
-        do {
-          moduleConfigChanged = false;
 
-          let updateData = fs.readFileSync(path.join(root, 'module.json'), 'utf8');
-          try {
-            updateData = JSON.parse(updateData);
-            if(updateData["disableAutoUpdate"]) {
-              console.warn("[update] WARNING: Auto-update disabled for module %s!", module);
-              successModules.push({
-                "name": module,
-                "options": updateData["options"] || {},
-              });
-            } else {
-              try {
-                const moduleConfig = await autoUpdateModule(module, root, updateData, updatelog, updatelimit, region);
+  let installedModulesChanged;
+  do {
+    installedModulesChanged = false;
+    const installedModules = listModules(moduleBase);
 
-                let failedFiles = [];
-                for(let result of moduleConfig["results"]) {
-                  if(!result[1]) {
-                    failedFiles.push(result[0]);
-                    failedFiles.push(result[2]);
-                  } else {
-                    if(result[0] === "module.json") {
-                      moduleConfigChanged = true;
-                      if(updatelog)
-                        console.log("[update] - Module configuration changed, restarting update!");
-                    }
-                  }
+    for (let coreModule in CoreModules) {
+      if(installedModules.indexOf(coreModule) < 0) {
+        const coreModuleResult = await autoUpdateFile('module.json', path.join(moduleBase, coreModule, 'module.json'), CoreModules[coreModule]);
+        if(!coreModuleResult[1])
+          throw new Error(`Unable to install core module "${coreModule}: ${coreModuleResult[2]}`);
+        console.log(`[update] Initialized core module "${coreModule}"`);
+        installedModulesChanged = true;
+      }
+    }
+
+    for (let module of installedModules) {
+      if(!module.endsWith('.js')) {
+        let root = path.join(moduleBase, module);
+        try {
+          let moduleConfigChanged;
+          do {
+            moduleConfigChanged = false;
+
+            let updateData = fs.readFileSync(path.join(root, 'module.json'), 'utf8');
+            try {
+              updateData = JSON.parse(updateData);
+
+              for(let dependency in updateData["dependencies"]) {
+                if(installedModules.indexOf(dependency) < 0) {
+                  const dependency_result = await autoUpdateFile('module.json', path.join(moduleBase, dependency, 'module.json'), updateData["dependencies"][dependency]);
+                  if(!dependency_result[1])
+                    throw new Error(`Unable to install dependency module "${dependency}: ${dependency_result[2]}`);
+                  console.log(`[update] Initialized dependency "${dependency}" for module "${module}"`);
+                  installedModulesChanged = true;
                 }
+              }
 
-                if(!moduleConfigChanged) {
-                  for(let def in moduleConfig["defs"]) {
-                    let def_data = moduleConfig["defs"][def];
-                    if(typeof def_data === 'object') {
-                      for(let def_ver of def_data) {
-                        if(def_ver !== 'raw')
-                          requiredDefs.add(def + "." + def_ver.toString() + ".def");
-                      }
+              if(updateData["disableAutoUpdate"]) {
+                console.warn("[update] WARNING: Auto-update disabled for module %s!", module);
+                successModules.push({
+                  "name": module,
+                  "options": updateData["options"] || {},
+                });
+              } else {
+                try {
+                  const moduleConfig = await autoUpdateModule(module, root, updateData, updatelog, updatelimit, region);
+
+                  let failedFiles = [];
+                  for(let result of moduleConfig["results"]) {
+                    if(!result[1]) {
+                      failedFiles.push(result[0]);
+                      failedFiles.push(result[2]);
                     } else {
-                      if(def_data !== 'raw')
-                        requiredDefs.add(def + "." + def_data.toString() + ".def");
+                      if(result[0] === "module.json") {
+                        moduleConfigChanged = true;
+                        if(updatelog)
+                          console.log("[update] - Module configuration changed, restarting update!");
+                      }
                     }
                   }
 
-                  if(failedFiles.length > 0)
-                    throw "Failed to update the following module files:\n - " + failedFiles.join("\n - ");
+                  if(!moduleConfigChanged) {
+                    for(let def in moduleConfig["defs"]) {
+                      let def_data = moduleConfig["defs"][def];
+                      if(typeof def_data === 'object') {
+                        for(let def_ver of def_data) {
+                          if(def_ver !== 'raw')
+                            requiredDefs.add(def + "." + def_ver.toString() + ".def");
+                        }
+                      } else {
+                        if(def_data !== 'raw')
+                          requiredDefs.add(def + "." + def_data.toString() + ".def");
+                      }
+                    }
 
-                  successModules.push({
+                    if(failedFiles.length > 0)
+                      throw "Failed to update the following module files:\n - " + failedFiles.join("\n - ");
+
+                    successModules.push({
+                      "name": module,
+                      "options": updateData["options"] || {},
+                    });
+                  }
+                } catch(e) {
+                  console.error("[update] ERROR: Unable to auto-update module %s:\n%s", module, e);
+                  if(updateData["supportUrl"]) {
+                    console.error("[update] Please go to %s and follow the given instructions or ask for help.", updateData["supportUrl"]);
+                    if(updateData["supportUrl"] !== DiscordURL)
+                      console.error("[update] Alternatively, join %s and ask in the #help channel.", DiscordURL);
+                  } else {
+                    console.error("[update] Please contact the module author or join %s and ask in the #help channel.", DiscordURL);
+                  }
+
+                  failedModules.push({
                     "name": module,
                     "options": updateData["options"] || {},
                   });
                 }
-              } catch(e) {
-                console.error("[update] ERROR: Unable to auto-update module %s:\n%s", module, e);
-                if(updateData["supportUrl"]) {
-                  console.error("[update] Please go to %s and follow the given instructions or ask for help.", updateData["supportUrl"]);
-                  if(updateData["supportUrl"] !== DiscordURL)
-                    console.error("[update] Alternatively, join %s and ask in the #help channel.", DiscordURL);
-                } else {
-                  console.error("[update] Please contact the module author or join %s and ask in the #help channel.", DiscordURL);
-                }
-
-                failedModules.push({
-                  "name": module,
-                  "options": updateData["options"] || {},
-                });
               }
+            } catch(e) {
+              console.error("[update] ERROR: Failed to prepare auto-update for module %s:\n%s", module, e);
+              failedModules.push({
+                "name": module,
+                "options": {},
+              });
             }
-          } catch(e) {
-            console.error("[update] ERROR: Failed to parse auto-update configuration for module %s:\n%s", module, e);
-            failedModules.push({
-              "name": module,
-              "options": {},
-            });
-          }
-        } while(moduleConfigChanged);
-      } catch(_) {
-        // legacy module without auto-update functionality
+          } while(moduleConfigChanged);
+        } catch(_) {
+          // legacy module without auto-update functionality
+          legacyModules.push({
+            "name": module,
+            "options": {},
+          });
+        }
+      } else {
         legacyModules.push({
           "name": module,
           "options": {},
         });
       }
-    } else {
-      legacyModules.push({
-        "name": module,
-        "options": {},
-      });
     }
-  }
+  } while(installedModulesChanged);
 
   let updatePromises = await autoUpdateDefs(requiredDefs, updatelog, updatelimit);
   let mapResults = await autoUpdateMaps(updatelog, updatelimit);

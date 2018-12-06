@@ -31,6 +31,37 @@ const {region: REGION, updatelog: UPDATE_LOG, dnsservers: DNS_SERVERS} = (() => 
     }
 })();
 
+// Migrate module folder
+const fs = require("fs");
+const path = require("path");
+const ModuleFolderOld = path.join(__dirname, "..", "node_modules");
+const ModuleFolder = path.join(__dirname, "..", "..", "mods");
+
+if(fs.existsSync(ModuleFolderOld)){
+  console.log("-------------------------------------------------------");
+  console.log("--------------- IMPORTANT INFORMATION -----------------");
+  console.log("-------------------------------------------------------");
+  console.log("Proxy's folder containing installed mods was moved from");
+  console.log("          [proxy folder]/bin/node_modules/             ");
+  console.log("                        to                             ");
+  console.log("               [proxy folder]/mods/                    ");
+  console.log("-------------------------------------------------------");
+
+  try {
+    fs.renameSync(ModuleFolderOld, ModuleFolder);
+    console.log("  All installed mods were automatically moved for you. ");
+    console.log("        No further manual action is required.          ");
+    console.log("-------------------------------------------------------");
+  } catch(e) {
+    console.log("ERROR: Unable to automatically migrate modules folder!");
+    console.log("ERROR: Try to move it yourself or ask in the #help channel of %s!", DiscordURL);
+    console.log("-------------------------------------------------------");
+    console.log(e)
+    process.exit(1);
+  }
+}
+
+// Load region and config
 const REGIONS = require("./regions");
 const currentRegion = REGIONS[REGION];
 if (!currentRegion) {
@@ -42,8 +73,6 @@ const REGION_SHORT = REGION.toLowerCase().split('-')[0];
 const isConsole = currentRegion["console"];
 const { customServers, listenHostname, hostname } = currentRegion;
 const hostnames = [].concat(hostname, currentRegion.altHostnames || []);
-const fs = require("fs");
-const path = require("path");
 
 // Region migration
 let migratedFile = null;
@@ -75,7 +104,7 @@ if (migratedFile) {
  return;
 }
 
-// No migration required
+// No region migration required
 console.log(`[sls] Tera-Proxy configured for region ${REGION}!`);
 
 let why;
@@ -130,22 +159,6 @@ if (!isConsole) {
     return;
   }
 }
-
-const moduleBase = path.join(__dirname, "..", "node_modules");
-let modules;
-
-function populateModulesList() {
-  modules = [];
-  for (let i = 0, k = -1, arr = fs.readdirSync(moduleBase), len = arr.length; i < len; ++i) {
-    const name = arr[i];
-    if (name[0] === "." || name[0] === "_")
-      continue;
-    if (!name.endsWith(".js") && !fs.lstatSync(path.join(moduleBase, name)).isDirectory())
-      continue;
-    modules[++k] = name;
-  }
-}
-
 
 const servers = new Map();
 let hostsTimeout = null;
@@ -215,7 +228,7 @@ let activeConnections = new Set;
 function runServ(target, socket) {
   const { Connection, RealClient } = require("tera-proxy-game");
 
-  const connection = new Connection({
+  const connection = new Connection(ModuleFolder, {
     "region": REGION_SHORT,
     "console": !!isConsole,
     "classic": !!currentRegion["classic"],
@@ -227,45 +240,7 @@ function runServ(target, socket) {
     port: target.port
   });
 
-  // Load modules
-  for (let mod of lastUpdateResult["failed"])
-    console.log("WARNING: Module %s could not be updated and will not be loaded!", mod.name);
-  for (let mod of lastUpdateResult["legacy"])
-    console.log("WARNING: Module %s does not support auto-updating!", mod.name);
-
-  let versioncheck_modules = lastUpdateResult["legacy"].slice(0);
-  for (let mod of lastUpdateResult["updated"]) {
-    mod.options.rootFolder = path.join(moduleBase, mod.name);
-    if (mod.options.loadOn === "connect") {
-      // Load default modules first
-      for (let mod of versioncheck_modules) {
-        if (mod.name === 'command' || mod.name === 'tera-game-state')
-          connection.dispatch.load(mod.name, module, mod.options);
-      }
-
-      // Then load other modules
-      for (let mod of versioncheck_modules) {
-        if (mod.name !== 'command' && mod.name !== 'tera-game-state')
-          connection.dispatch.load(mod.name, module, mod.options);
-      }
-    } else if(!mod.options.loadOn || mod.options.loadOn === "versioncheck") {
-      versioncheck_modules.push(mod);
-    }
-  }
-
-  connection.dispatch.on("init", () => {
-    // Load default modules first
-    for (let mod of versioncheck_modules) {
-      if (mod.name === 'command' || mod.name === 'tera-game-state')
-        connection.dispatch.load(mod.name, module, mod.options);
-    }
-
-    // Then load other modules
-    for (let mod of versioncheck_modules) {
-      if (mod.name !== 'command' && mod.name !== 'tera-game-state')
-        connection.dispatch.load(mod.name, module, mod.options);
-    }
-  });
+  connection.dispatch.moduleManager.loadAll();
 
   // Initialize server connection
   let remote = "???";
@@ -286,14 +261,6 @@ function runServ(target, socket) {
 
   srvConn.on("close", () => {
     console.log("[connection] %s disconnected", remote);
-    console.log("[proxy] unloading user modules");
-    for (let i = 0, arr = Object.keys(require.cache), len = arr.length; i < len; ++i) {
-      const key = arr[i];
-      if (key.startsWith(moduleBase)) {
-        delete require.cache[key];
-      }
-    }
-
     activeConnections.delete(connection);
   });
 }
@@ -302,8 +269,6 @@ const autoUpdate = require("./update");
 
 function createServ(target, socket) {
   socket.setNoDelay(true);
-
-  populateModulesList();
   runServ(target, socket);
 }
 
@@ -363,7 +328,6 @@ function startProxy() {
 
   // TODO: this is a dirty hack, implement this stuff properly
   for (let mod of lastUpdateResult["updated"]) {
-    mod.options.rootFolder = path.join(moduleBase, mod.name);
     if (mod.options.loadOn === "startup") {
       console.log(`[proxy] Initializing module ${mod.name}`);
       require(mod.name)(REGION_SHORT);
@@ -371,10 +335,13 @@ function startProxy() {
   }
 }
 
-populateModulesList();
-autoUpdate(moduleBase, modules, UPDATE_LOG, true, REGION_SHORT).then((updateResult) => {
+autoUpdate(ModuleFolder, UPDATE_LOG, true, REGION_SHORT).then((updateResult) => {
+  for (let mod of updateResult["legacy"])
+    console.log("[update] WARNING: Module %s does not support auto-updating!", mod.name);
+  for (let mod of updateResult["failed"])
+    console.log("[update] ERROR: Module %s could not be updated and might be broken!", mod.name);
   if(!updateResult["tera-data"])
-    console.log("WARNING: There were errors updating tera-data. This might result in further errors.");
+    console.log("[update] ERROR: There were errors updating tera-data. This might result in further errors.");
 
   delete require.cache[require.resolve("tera-data-parser")];
   delete require.cache[require.resolve("tera-proxy-game")];
