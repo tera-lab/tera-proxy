@@ -68,6 +68,9 @@
       "overwrite": false,
       "hash": "4042486ead0a16dc7afbdf751acd631758e4d871983d86967ff2147db6b30da7"
     },
+    "mods/command/module.json": "fa02a4394cba30b50a5c81c3f845a34d3bfd829d28a46f03758b6b85292a0bc6",
+    "mods/tera-game-state/module.json": "e6f3fb4bf0aa155cac512e56775a111c0d274b1c55bd14e22a513d3beb8924b8",
+    "mods/tera-lab/module.json": "b911c5ef7f08cbe8ad4239c0d344b43d44d42365a41f8b7eaceaeda88494048f",
     "node_modules/long/package.json": "cb152cbdcca98dad4e3dd2a8ad0007e6d0b362437b5b4be8fd0b42fd916652a5",
     "node_modules/long/index.js": "246b9723d5ed996bb89456a5be2ce2e8bf9428b49241a94c41b22b50f6200bd5",
     "node_modules/tera-data-parser/package.json": "709841545349824533cbf4dfa112982d31cdfff8e3f881ff6a5cfe0fe70b4534",
