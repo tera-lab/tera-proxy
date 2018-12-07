@@ -1,9 +1,10 @@
 {
   "files": {
+    "bin/lib/index.js": "cebeb857c9a39b39269001db689e124ba4e83317d14bad0cbab1a9cfe4cf3285",
     "bin/lib/hosts.js": "2d1592299406dc7e0f082c30809236c305226766e4d26afad698899c646a80ed",
     "bin/lib/netstat.js": "2b7b5c825c82833403684545fc9b9cfc57cb878fa782bbde860805984119b6cb",
     "bin/lib/process-listener.js": "f3bd58d29950000dc864f3bce1bb910389de2281a798461e675e5200a2c5e6c7",
-    "bin/lib/proxy.js": "91bfabec7e61a3278583202046174127b4686fc224718094cbf51263b2dde78d",
+    "bin/lib/proxy.js": "7aaa5235dfb3490e43d3208fe20c170de597031477bb0c302dfbabe39a03965b",
     "bin/lib/regions.js": "33d1d9890e2b3b7759e9b334291de0aa8936172ddc238b91abc5805518207b83",
     "bin/lib/update.js": "7d6c38813d798a640e0484fab3fe00f7e0a9287131f4f1587141032f897e89d3",
     "bin/lib/update-self.js": "3af4ce972b52034165431ba9a2ea841f590ffabed69d243014cba942a83f9a90",
