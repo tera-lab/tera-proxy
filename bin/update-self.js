@@ -13,10 +13,14 @@ const DiscordURL = "https://discord.gg/dUNDDtw";
 
 // Safely load configuration
 let branch = 'master';
+let updatelog = false;
 try {
-  const config = require("../config.json");
-  if(config && config.branch)
-    branch = config.branch.toLowerCase();
+  const config = require("./config").loadConfig();
+  if(config) {
+    if(config.branch)
+      branch = config.branch.toLowerCase();
+    updatelog = !!config.updatelog;
+  }
 } catch(_) { }
 
 // Implementation
@@ -27,9 +31,7 @@ function forcedirSync(dir) {
     const curDir = path.resolve(parentDir, childDir);
     try {
       fs.mkdirSync(curDir);
-    } catch (err) {
-
-    }
+    } catch (_) { }
 
     return curDir;
   }, initDir);
@@ -60,8 +62,8 @@ async function autoUpdateSelf(updatelimit = true, serverIndex = 0) {
     console.error("ERROR: Please join %s and download the prepackaged release version from the #proxy channel!", DiscordURL);
     return Promise.reject("Request not installed");
   }
-  
-  if(serverIndex == 0)
+
+  if(serverIndex === 0)
     console.log(`[update] Proxy self-update started (Branch: ${branch})`);
 
   try {
@@ -71,7 +73,7 @@ async function autoUpdateSelf(updatelimit = true, serverIndex = 0) {
 
     let promises = [];
     for(let file in manifest["files"]) {
-      let filepath = path.join(__dirname, "..", "..", file);
+      let filepath = path.join(__dirname, "..", file);
       let filedata = manifest["files"][file];
       let needsUpdate = !fs.existsSync(filepath);
       let expectedHash = null;
@@ -87,6 +89,8 @@ async function autoUpdateSelf(updatelimit = true, serverIndex = 0) {
       }
 
       if(needsUpdate) {
+        if(updatelog)
+          console.log("[update] - Download " + file);
         let promise = autoUpdateFile(file, filepath, TeraProxyAutoUpdateServers[serverIndex] + branch + '/' + file, expectedHash);
         promises.push(updatelimit ? (await promise) : promise);
       }
