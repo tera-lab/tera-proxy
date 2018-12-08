@@ -1,5 +1,5 @@
 @echo off
-title Caali's TERA Proxy
+title valkyr1e's TERA Proxy powered by Caali
 cd /d "%~dp0"
 
 WHERE node > NUL 2> NUL
