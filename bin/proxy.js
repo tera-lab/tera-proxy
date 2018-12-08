@@ -85,6 +85,9 @@ class TeraProxy {
 
         const ConnectionManager = require('./connectionManager');
         this.connectionManager = new ConnectionManager(moduleFolder, this.region.id, this.region.idShort, this.region.platform);
+
+        this.listedProcesses = {};
+        this.hostsRevertTimeout = null;
     }
 
     destructor() {
@@ -106,6 +109,7 @@ class TeraProxy {
         console.log(`[proxy] Tera-Proxy configured for region ${this.region.id}!`);
         HostsClean(this.region);
         this.slsListen();
+        this.exeListen();
 
         // TODO: this is a dirty hack, implement a proper API for client/startup mods
         const { listModules, loadModuleInfo } = require('tera-proxy-game');
@@ -122,6 +126,32 @@ class TeraProxy {
         return this.connectionManager.hasActiveConnections;
     }
 
+    exeListen() {
+        require('process-list').snapshot('pid', 'name').then(processes => {
+            const newListedProcesses = {};
+            for (let process of processes) {
+                if (process.name === 'TERA.exe') {
+                    newListedProcesses[process.pid] = true;
+                    if (!this.listedProcesses[process.pid]) {
+                        HostsInitialize(this.region);
+                        clearTimeout(this.hostsRevertTimeout);
+                        this.hostsRevertTimeout = setTimeout(() => {
+                            HostsClean(this.region);
+                        }, 1000*60*2)
+                    }
+                }
+            }
+
+            for (let pid in this.listedProcesses) {
+                if (!newListedProcesses[pid])
+                    HostsClean(this.region);
+            }
+
+            this.listedProcesses = newListedProcesses;
+            setTimeout(() => {this.exeListen()}, 3000);
+        });
+    }
+    
     slsInit() {
         if (this.region.platform !== 'console') {
             const SlsProxy = require("tera-proxy-sls");
@@ -135,8 +165,6 @@ class TeraProxy {
         if (err) {
             ListenError(err);
         } else {
-            HostsInitialize(this.region);
-
             for (let i = this.servers.entries(), step; !(step = i.next()).done;) {
                 const [id, server] = step.value;
                 const currentCustomServer = this.region.data.customServers[id];

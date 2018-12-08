@@ -7,7 +7,7 @@
     "bin/connectionManager.js": "0bfbf330ecff0cbc634091cc470f0d1b3b6eeb03d45e579df0f89c24605a7510",
     "bin/hosts.js": "2d1592299406dc7e0f082c30809236c305226766e4d26afad698899c646a80ed",
     "bin/netstat.js": "2b7b5c825c82833403684545fc9b9cfc57cb878fa782bbde860805984119b6cb",
-    "bin/proxy.js": "212769e3f0797055205683ca92c64739459c24df20468ad70cc346a2b8798ebd",
+    "bin/proxy.js": "54d8a2838e64da44ce38345021206e5e8f4be9fc49766e33e6a1503f5a313d21",
     "bin/regions.js": "30a8ed0985e5f47503c907ded11290c72fc20e0d478ae7e63fffdf7a9b13c8bb",
     "bin/update.js": "e0ea4c797a6e249635ef26bd195f9a1e942dc1ed6aacfc6f93cff48d273f0c3d",
     "bin/update-self.js": "0f3ee10e62c96e3aea5f87f29b601ce39dca10ed0d2ef299a2b16cad2068f003",
@@ -33,7 +33,7 @@
     },
     "bin/servers/servers-kr-test.json": {
       "overwrite": false,
-      "hash": "46bdf430c8b7b439b66db118265b469c5b0090c1bfeba11f09dc436da36b644b"
+      "hash": "5d090a4134160e4ddef9a948741ba7bfe0a2474e507ccae87f0f4ffa50f470b9"
     },
     "bin/servers/servers-ru.json": {
       "overwrite": false,
@@ -41,7 +41,7 @@
     },
     "bin/servers/servers-ru-test.json": {
       "overwrite": false,
-      "hash": "89cbd37ed8b7efd610bf88aef248946866f269b2dcbfd238cdafeaea0dde8923"
+      "hash": "d40b2820b4bbca8bf949170855d4e7cdc7abc0405470bb339e0da76e0f4f9520"
     },
     "bin/servers/servers-tw.json": {
       "overwrite": false,
