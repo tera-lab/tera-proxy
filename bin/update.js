@@ -2,10 +2,9 @@ const request = require('request-promise-native');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { listModules } = require('tera-proxy-game');
+const { CoreModules, listModules, listModuleInfos } = require('tera-proxy-game').ModuleInstallation;
 
 const TeraDataAutoUpdateServer = "https://raw.githubusercontent.com/caali-hackerman/tera-data/master/";
-const DiscordURL = "https://discord.gg/dUNDDtw";
 
 function forcedirSync(dir) {
   const sep = path.sep;
@@ -59,6 +58,13 @@ async function autoUpdateFile(file, filepath, url, drmKey, expectedHash = null) 
   }
 }
 
+function migrateModuleUpdateUrlRoot(update_url_root) {
+  if(update_url_root === "https://raw.githubusercontent.com/caali-hackerman/tera-proxy/master/bin/node_modules/command/")
+    return "https://raw.githubusercontent.com/caali-hackerman/command/master/";
+  else
+    return update_url_root;
+}
+
 async function autoUpdateModule(name, root, updateData, updatelog, updatelimit, region, serverIndex = 0) {
   try {
     // If only one file (module.json) exists, it's a fresh install
@@ -67,7 +73,7 @@ async function autoUpdateModule(name, root, updateData, updatelog, updatelimit, 
     else if (updatelog)
       console.log("[update] Updating module " + name);
 
-    const update_url_root = updateData["servers"][serverIndex];
+    const update_url_root = migrateModuleUpdateUrlRoot(updateData["servers"][serverIndex]);
     const manifest_file = 'manifest.json';
     const manifest_url = update_url_root + manifest_file;
     const manifest_path = path.join(root, manifest_file);
@@ -240,12 +246,6 @@ async function autoUpdateMaps(updatelog, updatelimit) {
   return promises;
 }
 
-const CoreModules = {
-  "command": "https://raw.githubusercontent.com/caali-hackerman/tera-proxy/master/bin/node_modules/command/module.json",
-  "tera-game-state": "https://raw.githubusercontent.com/caali-hackerman/tera-game-state/master/module.json",
-  "tera-lab": "https://raw.githubusercontent.com/tera-lab/tera-lab-mod/master/module.json",
-};
-
 async function autoUpdate(moduleBase, updatelog, updatelimit, region) {
   console.log("[update] Auto-update started!");
   let requiredDefs = new Set(["C_CHECK_VERSION.1.def"]);
@@ -258,9 +258,10 @@ async function autoUpdate(moduleBase, updatelog, updatelimit, region) {
   do {
     installedModulesChanged = false;
     const installedModules = listModules(moduleBase);
+    const installedModuleInfos = listModuleInfos(moduleBase);
 
     for (let coreModule in CoreModules) {
-      if(installedModules.indexOf(coreModule) < 0) {
+      if(!installedModuleInfos.some(mod => mod.name === coreModule.toLowerCase())) {
         const coreModuleResult = await autoUpdateFile('module.json', path.join(moduleBase, coreModule, 'module.json'), CoreModules[coreModule]);
         if(!coreModuleResult[1])
           throw new Error(`Unable to install core module "${coreModule}: ${coreModuleResult[2]}`);
@@ -282,7 +283,7 @@ async function autoUpdate(moduleBase, updatelog, updatelimit, region) {
               updateData = JSON.parse(updateData);
 
               for(let dependency in updateData["dependencies"]) {
-                if(installedModules.indexOf(dependency) < 0) {
+                if(!installedModuleInfos.some(mod => mod.name === dependency.toLowerCase())) {
                   const dependency_result = await autoUpdateFile('module.json', path.join(moduleBase, dependency, 'module.json'), updateData["dependencies"][dependency]);
                   if(!dependency_result[1])
                     throw new Error(`Unable to install dependency module "${dependency}: ${dependency_result[2]}`);
@@ -341,10 +342,10 @@ async function autoUpdate(moduleBase, updatelog, updatelimit, region) {
                   console.error("[update] ERROR: Unable to auto-update module %s:\n%s", module, e);
                   if(updateData["supportUrl"]) {
                     console.error("[update] Please go to %s and follow the given instructions or ask for help.", updateData["supportUrl"]);
-                    if(updateData["supportUrl"] !== DiscordURL)
-                      console.error("[update] Alternatively, join %s and ask in the #help channel.", DiscordURL);
+                    if(updateData["supportUrl"] !== global.TeraProxy.DiscordUrl)
+                      console.error("[update] Alternatively, ask here: ", global.TeraProxy.SupportUrl);
                   } else {
-                    console.error("[update] Please contact the module author or join %s and ask in the #help channel.", DiscordURL);
+                    console.error("[update] Please contact the module author or ask here: ", global.TeraProxy.SupportUrl);
                   }
 
                   failedModules.push({
@@ -389,10 +390,10 @@ async function autoUpdate(moduleBase, updatelog, updatelimit, region) {
   }
 
   if(failedFiles.length > 0)
-    console.error("[update] ERROR: Unable to update the following def/map files. Please join %s and report this error in the #help channel!\n - %s", DiscordURL, failedFiles.join('\n - '));
+    console.error("[update] ERROR: Unable to update the following def/map files. Please ask here for help: %s\n - %s", global.TeraProxy.SupportUrl, failedFiles.join('\n - '));
 
   console.log("[update] Auto-update complete!");
-  return {"tera-data": (failedFiles.length == 0), "updated": successModules, "legacy": legacyModules, "failed": failedModules};
+  return {"tera-data": (failedFiles.length === 0), "updated": successModules, "legacy": legacyModules, "failed": failedModules};
 }
 
 module.exports = autoUpdate;

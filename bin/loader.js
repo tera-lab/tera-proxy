@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 
-const DiscordURL = "https://discord.gg/dUNDDtw";
 const ModuleFolder = path.join(__dirname, "..", "mods");
 
 // Load and validate configuration
@@ -10,29 +9,35 @@ function LoadConfiguration() {
         return require('./config').loadConfig();
     } catch (_) {
         console.log("ERROR: Whoops, looks like you've fucked up your config.json!");
-        console.log("ERROR: Try to fix it yourself or ask in the #help channel of %s!", DiscordURL);
+        console.log(`ERROR: Try to fix it yourself or ask here: ${global.TeraProxy.SupportUrl}!`);
         process.exit(1);
     }
 }
 
 // Check node/electron version
 function NodeVersionCheck() {
-    let BigIntSupported = false;
-    try { BigIntSupported = eval('1234n === 1234n'); } catch (_) { }
+    const { checkRuntimeCompatibility } = require('./utils');
 
-    if (['11.0.0', '11.1.0', '11.2.0', '11.3.0'].includes(process.versions.node)) {
-        console.error('ERROR: Node.JS 11.0 to 11.3 contain critical bugs preventing timers from working properly. Please install version 11.4 or later!');
-        process.exit();
-    } else if (process.versions.modules < 64 || !BigIntSupported) {
-        if (!!process.versions.electron) {
-            console.error('ERROR: Your version of Electron is too old to run tera-proxy!');
-            console.error('ERROR: If you are using Arborean Apparel, download the latest release from:');
-            console.error('ERROR: https://github.com/iribae/arborean-apparel/releases');
-            console.error('ERROR: Otherwise, please ask in the #help channel of %s!', DiscordURL);
-        } else {
-            console.error('ERROR: Your installed version of Node.JS is too old to run tera-proxy!');
-            console.error('ERROR: Please install the latest version from https://nodejs.org/en/download/current/');
+    try {
+        checkRuntimeCompatibility();
+    } catch (e) {
+        switch (e.message) {
+            case 'BigInt not supported':
+                if (!!process.versions.electron) {
+                    console.error('ERROR: Your version of Electron is too old to run tera-proxy!');
+                    console.error('ERROR: If you are using Arborean Apparel, download the latest release from:');
+                    console.error('ERROR: https://github.com/iribae/arborean-apparel/releases');
+                    console.error(`ERROR: Otherwise, please ask here: ${global.TeraProxy.SupportUrl}!`);
+                } else {
+                    console.error('ERROR: Your installed version of Node.JS is too old to run tera-proxy!');
+                    console.error('ERROR: Please install the latest version from https://nodejs.org/en/download/current/');
+                }
+                break;
+
+            default:
+                console.error(`ERROR: ${e.message}`);
         }
+
         process.exit();
     }
 }
@@ -48,8 +53,8 @@ function ProxyMigration() {
     try {
         fs.renameSync(path.join(__dirname, 'config.json'), path.join(__dirname, '..', 'config.json'));
     } catch (e) {
-        console.log("ERROR: Unable to migrate your proxy settings!");
-        console.log("ERROR: Try to move them yourself or ask in the #help channel of %s!", DiscordURL);
+        console.log("[update] ERROR: Unable to migrate your proxy settings!");
+        console.log(`[update] ERROR: Try to move them yourself or ask here: ${global.TeraProxy.SupportUrl}!`);
         console.log(e);
         process.exit(1);
     }
@@ -62,8 +67,8 @@ function ProxyMigration() {
         fs.readdirSync(oldServersFolder).forEach( entry => fs.renameSync(path.join(oldServersFolder, entry), path.join(newServersFolder, entry)) );
         fs.rmdirSync(oldServersFolder);
     } catch (e) {
-        console.log("ERROR: Unable to migrate your server settings!");
-        console.log("ERROR: Try to move them yourself or ask in the #help channel of %s!", DiscordURL);
+        console.log("[update] ERROR: Unable to migrate your server settings!");
+        console.log(`[update] ERROR: Try to move them yourself or ask here: ${global.TeraProxy.SupportUrl}!`);
         console.log(e);
         process.exit(1);
     }
@@ -71,24 +76,24 @@ function ProxyMigration() {
     // Migrate module folder
     const ModuleFolderOld = path.join(__dirname, "node_modules");
     if (fs.existsSync(ModuleFolderOld)) {
-        console.log("-------------------------------------------------------");
-        console.log("--------------- IMPORTANT INFORMATION -----------------");
-        console.log("-------------------------------------------------------");
-        console.log("Proxy's folder containing installed mods was moved from");
-        console.log("          [proxy folder]/bin/node_modules/             ");
-        console.log("                        to                             ");
-        console.log("               [proxy folder]/mods/                    ");
-        console.log("-------------------------------------------------------");
+        console.log("[update] -------------------------------------------------------");
+        console.log("[update] --------------- IMPORTANT INFORMATION -----------------");
+        console.log("[update] -------------------------------------------------------");
+        console.log("[update] Proxy's folder containing installed mods was moved from");
+        console.log("[update]           [proxy folder]/bin/node_modules/             ");
+        console.log("[update]                         to                             ");
+        console.log("[update]                [proxy folder]/mods/                    ");
+        console.log("[update] -------------------------------------------------------");
 
         try {
             fs.renameSync(ModuleFolderOld, ModuleFolder);
-            console.log("  All installed mods were automatically moved for you. ");
-            console.log("        No further manual action is required.          ");
-            console.log("-------------------------------------------------------");
+            console.log("[update]   All installed mods were automatically moved for you. ");
+            console.log("[update]         No further manual action is required.          ");
+            console.log("[update] -------------------------------------------------------");
         } catch (e) {
-            console.log("ERROR: Unable to automatically migrate modules folder!");
-            console.log("ERROR: Try to move it yourself or ask in the #help channel of %s!", DiscordURL);
-            console.log("-------------------------------------------------------");
+            console.log("[update] ERROR: Unable to automatically migrate modules folder!");
+            console.log(`[update] ERROR: Try to move it yourself or ask here: ${global.TeraProxy.SupportUrl}!`);
+            console.log("[update] -------------------------------------------------------");
             console.log(e);
             process.exit(1);
         }
@@ -107,7 +112,7 @@ function LoadRegion(region) {
         return require('./config').loadRegion(region);
     } catch (e) {
         console.log(`ERROR: Unable to load region information: ${e}`);
-        console.log("ERROR: Try to fix it yourself or ask in the #help channel of %s!", DiscordURL);
+        console.log(`ERROR: Try to fix it yourself or ask here: ${global.TeraProxy.SupportUrl}!`);
         process.exit(1);
     }
 }
@@ -138,11 +143,58 @@ function RegionMigration(region) {
     if (migratedFile) {
         try {
             fs.unlinkSync(path.join(__dirname, migratedFile));
-            console.log(`Due to a change in the server list by the publisher, your server configuration for region ${region.id} was reset. Please restart proxy for the changes to take effect!`);
+            console.log(`[update] Due to a change in the server list by the publisher, your server configuration for region ${region.id} was reset.`);
+            console.log('[update] Please restart proxy for the changes to take effect!');
         } catch (e) {
-            console.log(`ERROR: Unable to migrate server list for region ${region.id}: ${e}`);
+            console.log(`[update] ERROR: Unable to migrate server list for region ${region.id}: ${e}`);
         }
         process.exit(1);
+    }
+}
+
+// Migrate modules
+function ModuleMigration(ModuleFolder) {
+    const { listModuleInfos, installModule, uninstallModule } = require('tera-proxy-game').ModuleInstallation;
+
+    // Migrate swim-fix and chat-sanitizer to bugfix
+    let BugfixModules = [];
+    let BugfixInstalled = false;
+    listModuleInfos(ModuleFolder).forEach(modInfo => {
+        if(['swim-fix', 'swim-fix.js', 'chat-sanitizer', 'chat-sanitizer.js'].includes(modInfo.name) || ((modInfo.name === 'bugfix' || modInfo.name === 'bugfix-master') && modInfo.compatibility !== 'compatible')) {
+            BugfixModules.push(modInfo.name);
+            uninstallModule(modInfo);
+        }
+
+        if (modInfo.name === 'bugfix' && modInfo.compatibility === 'compatible')
+            BugfixInstalled = true;
+    });
+
+    if(BugfixModules.length > 0) {
+        if (BugfixInstalled) {
+            console.log('[update] The following installed modules have been automatically uninstalled because they');
+            console.log('[update] are already included in the installed "bugfix" module:');
+            BugfixModules.forEach(mod => console.log(`[update]  - ${mod}`));
+        } else {
+            console.log('[update] The following installed modules have been automatically converted into the new "bugfix" module:');
+            BugfixModules.forEach(mod => console.log(`[update]  - ${mod}`));
+            installModule(ModuleFolder, {"name": "bugfix", "servers": ["https://raw.githubusercontent.com/caali-hackerman/bugfix/master/"]});
+        }
+    }
+
+    // Migrate instant-xxxxx mods to instant-everything
+    let InstantModules = [];
+    listModuleInfos(ModuleFolder).forEach(modInfo => {
+        if(['instant-soulbind', 'instant-soulbind.js', 'instant-enchant', 'instant-enchant.js', 'instant-upgrade', 'instant-upgrade.js', 'instant-merge', 'instant-merge.js', 'instant-dismantle', 'instant-dismantle.js'].includes(modInfo.name)) {
+            InstantModules.push(modInfo.name);
+            uninstallModule(modInfo);
+        }
+    });
+
+    if(InstantModules.length > 0) {
+        console.log('[update] The following installed modules have been automatically converted into the new "instant-everything" module:');
+        InstantModules.forEach(mod => console.log(`[update]  - ${mod}`));
+        console.log('[update] Enter "/8 instant" in the chat to see a list of toggleable features. Use "/8 instant [feature]" to toggle them.');
+        installModule(ModuleFolder, {"name": "instant-everything", "servers": ["https://raw.githubusercontent.com/caali-hackerman/instant-everything/master/"]});
     }
 }
 
@@ -178,25 +230,39 @@ function RunProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig) {
 }
 
 // Main
+const { initGlobalSettings } = require('./utils');
+initGlobalSettings(false);
 NodeVersionCheck();
 ProxyMigration();
 const ProxyConfig = LoadConfiguration();
+global.TeraProxy.DevMode = !!ProxyConfig.devmode;
 const ProxyRegionConfig = LoadRegion(ProxyConfig.region);
 RegionMigration(ProxyRegionConfig);
+ModuleMigration(ModuleFolder);
 
-const autoUpdate = require("./update");
-autoUpdate(ModuleFolder, ProxyConfig.updatelog, true, ProxyRegionConfig.idShort).then(updateResult => {
-    for (let mod of updateResult["legacy"])
-        console.log("[update] WARNING: Module %s does not support auto-updating!", mod.name);
-    for (let mod of updateResult["failed"])
-        console.log("[update] ERROR: Module %s could not be updated and might be broken!", mod.name);
-    if (!updateResult["tera-data"])
-        console.log("[update] ERROR: There were errors updating tera-data. This might result in further errors.");
-
-    delete require.cache[require.resolve("tera-data-parser")];
-    delete require.cache[require.resolve("tera-proxy-game")];
-
+// Auto-update modules & tera-data and run
+if (ProxyConfig.noupdate) {
+    console.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    console.warn("!!!!!      YOU HAVE GLOBALLY DISABLED AUTOMATIC UPDATES     !!!!!");
+    console.warn("!!!!! THERE WILL BE NO SUPPORT FOR ANY KIND OF PROBLEM THAT !!!!!");
+    console.warn("!!!!!      YOU MIGHT ENCOUNTER AS A RESULT OF DOING SO      !!!!!");
+    console.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     RunProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig);
-}).catch(e => {
-    console.log("ERROR: Unable to auto-update: %s", e);
-});
+} else {
+    const autoUpdate = require("./update");
+    autoUpdate(ModuleFolder, ProxyConfig.updatelog, true, ProxyRegionConfig.idShort).then(updateResult => {
+        for (let mod of updateResult["legacy"])
+            console.log("[update] WARNING: Module %s does not support auto-updating!", mod.name);
+        for (let mod of updateResult["failed"])
+            console.log("[update] ERROR: Module %s could not be updated and might be broken!", mod.name);
+        if (!updateResult["tera-data"])
+            console.log("[update] ERROR: There were errors updating tera-data. This might result in further errors.");
+
+        delete require.cache[require.resolve("tera-data-parser")];
+        delete require.cache[require.resolve("tera-proxy-game")];
+
+        RunProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig);
+    }).catch(e => {
+        console.log("ERROR: Unable to auto-update: %s", e);
+    });
+}
