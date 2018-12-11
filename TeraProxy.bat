@@ -2,7 +2,7 @@
 title valkyr1e's TERA Proxy powered by Caali
 cd /d "%~dp0"
 
-WHERE node > NUL 2> NUL
+node -e "" > NUL 2> NUL
 IF %ERRORLEVEL% NEQ 0 (
   ECHO ERROR: Node.js is not installed!
   ECHO ERROR: Please go to https://discord.gg/dUNDDtw and follow the installation guide.
