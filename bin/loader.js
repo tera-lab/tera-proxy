@@ -1,18 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-
 const ModuleFolder = path.join(__dirname, "..", "mods");
-
-// Load and validate configuration
-function LoadConfiguration() {
-    try {
-        return require('./config').loadConfig();
-    } catch (_) {
-        console.log("ERROR: Whoops, looks like you've fucked up your config.json!");
-        console.log(`ERROR: Try to fix it yourself or ask here: ${global.TeraProxy.SupportUrl}!`);
-        process.exit(1);
-    }
-}
 
 // Check node/electron version
 function NodeVersionCheck() {
@@ -42,16 +30,28 @@ function NodeVersionCheck() {
     }
 }
 
+// Load and validate configuration
+function LoadConfiguration() {
+    try {
+        return require('./config').loadConfig();
+    } catch (_) {
+        console.log("ERROR: Whoops, looks like you've fucked up your config.json!");
+        console.log(`ERROR: Try to fix it yourself or ask here: ${global.TeraProxy.SupportUrl}!`);
+        process.exit(1);
+    }
+}
+
 // Migrate from old proxy versions
 function ProxyMigration() {
     const oldLibFolder = path.join(__dirname, 'lib');
-    const isOldStructure = fs.existsSync(oldLibFolder);
+    const oldConfig = path.join(__dirname, 'config.json');
+    const isOldStructure = fs.existsSync(oldLibFolder) && fs.existsSync(oldConfig);
     if(!isOldStructure)
         return;
 
     // Migrate config.json
     try {
-        fs.renameSync(path.join(__dirname, 'config.json'), path.join(__dirname, '..', 'config.json'));
+        fs.renameSync(oldConfig, path.join(__dirname, '..', 'config.json'));
     } catch (e) {
         console.log("[update] ERROR: Unable to migrate your proxy settings!");
         console.log(`[update] ERROR: Try to move them yourself or ask here: ${global.TeraProxy.SupportUrl}!`);
@@ -183,50 +183,33 @@ function ModuleMigration(ModuleFolder) {
 
     // Migrate instant-xxxxx mods to instant-everything
     let InstantModules = [];
+    let InstantEverythingInstalled = false;
     listModuleInfos(ModuleFolder).forEach(modInfo => {
-        if(['instant-soulbind', 'instant-soulbind.js', 'instant-enchant', 'instant-enchant.js', 'instant-upgrade', 'instant-upgrade.js', 'instant-merge', 'instant-merge.js', 'instant-dismantle', 'instant-dismantle.js'].includes(modInfo.name)) {
+        if(['instant-soulbind', 'instant-soulbind-master', 'instant-soulbind.js',
+            'instant-enchant', 'instant-enchant-master', 'instant-enchant.js',
+            'instant-upgrade', 'instant-upgrade-master', 'instant-upgrade.js',
+            'instant-merge', 'instant-merge-master', 'instant-merge.js',
+            'instant-dismantle', 'instant-dismantle-master', 'instant-dismantle.js'].includes(modInfo.name)) {
             InstantModules.push(modInfo.name);
             uninstallModule(modInfo);
         }
+
+        if (modInfo.name === 'instant-everything' && modInfo.compatibility === 'compatible')
+            InstantEverythingInstalled = true;
     });
 
     if(InstantModules.length > 0) {
-        console.log('[update] The following installed modules have been automatically converted into the new "instant-everything" module:');
-        InstantModules.forEach(mod => console.log(`[update]  - ${mod}`));
-        console.log('[update] Enter "/8 instant" in the chat to see a list of toggleable features. Use "/8 instant [feature]" to toggle them.');
-        installModule(ModuleFolder, {"name": "instant-everything", "servers": ["https://raw.githubusercontent.com/caali-hackerman/instant-everything/master/"]});
+        if (InstantEverythingInstalled) {
+            console.log('[update] The following installed modules have been automatically uninstalled because they');
+            console.log('[update] are already included in the installed "instant-everything" module:');
+            InstantModules.forEach(mod => console.log(`[update]  - ${mod}`));
+        } else {
+            console.log('[update] The following installed modules have been automatically converted into the new "instant-everything" module:');
+            InstantModules.forEach(mod => console.log(`[update]  - ${mod}`));
+            console.log('[update] Enter "/8 instant" in the chat to see a list of toggleable features. Use "/8 instant [feature]" to toggle them.');
+            installModule(ModuleFolder, {"name": "instant-everything", "servers": ["https://raw.githubusercontent.com/caali-hackerman/instant-everything/master/"]});
+        }
     }
-}
-
-// Runs proxy
-function RunProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig) {
-    const TeraProxy = require('./proxy');
-    let proxy = new TeraProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig);
-    proxy.run();
-
-    // Set up clean exit
-    const isWindows = process.platform === "win32";
-
-    function cleanExit() {
-        console.log("terminating...");
-
-        proxy.destructor();
-        proxy = null;
-
-        if (isWindows)
-            process.stdin.pause();
-    }
-
-    if (isWindows) {
-        require("readline").createInterface({
-            input: process.stdin,
-            output: process.stdout
-        }).on("SIGINT", () => process.emit("SIGINT"));
-    }
-
-    process.on("SIGHUP", cleanExit);
-    process.on("SIGINT", cleanExit);
-    process.on("SIGTERM", cleanExit);
 }
 
 // Main
@@ -240,29 +223,6 @@ const ProxyRegionConfig = LoadRegion(ProxyConfig.region);
 RegionMigration(ProxyRegionConfig);
 ModuleMigration(ModuleFolder);
 
-// Auto-update modules & tera-data and run
-if (ProxyConfig.noupdate) {
-    console.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    console.warn("!!!!!      YOU HAVE GLOBALLY DISABLED AUTOMATIC UPDATES     !!!!!");
-    console.warn("!!!!! THERE WILL BE NO SUPPORT FOR ANY KIND OF PROBLEM THAT !!!!!");
-    console.warn("!!!!!      YOU MIGHT ENCOUNTER AS A RESULT OF DOING SO      !!!!!");
-    console.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    RunProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig);
-} else {
-    const autoUpdate = require("./update");
-    autoUpdate(ModuleFolder, ProxyConfig.updatelog, true, ProxyRegionConfig.idShort).then(updateResult => {
-        for (let mod of updateResult["legacy"])
-            console.log("[update] WARNING: Module %s does not support auto-updating!", mod.name);
-        for (let mod of updateResult["failed"])
-            console.log("[update] ERROR: Module %s could not be updated and might be broken!", mod.name);
-        if (!updateResult["tera-data"])
-            console.log("[update] ERROR: There were errors updating tera-data. This might result in further errors.");
-
-        delete require.cache[require.resolve("tera-data-parser")];
-        delete require.cache[require.resolve("tera-proxy-game")];
-
-        RunProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig);
-    }).catch(e => {
-        console.log("ERROR: Unable to auto-update: %s", e);
-    });
-}
+// Pass control to second-stage loader
+const SecondStageLoader = require(!!process.versions.electron ? './loader-gui' : './loader-console');
+SecondStageLoader(ModuleFolder, ProxyConfig, ProxyRegionConfig);
