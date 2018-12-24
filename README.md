@@ -1,16 +1,15 @@
-# Fork of Meishuu's/Pinkie Pie's tera-proxy with built-in support for automatic updates
+# Fork of Meishuu's/Pinkie Pie's/Caali's tera-proxy with built-in support for automatic updates/special support for JP
 * It will auto-update your opcode mappings, packet definitions, and compatible installed modules. You no longer need do manually update _anything_!
-* Feel free to visit my Discord server at https://discord.gg/dUNDDtw
-* Originally forked from https://github.com/pinkipi/tera-proxy which was DMCA'd by EME.
+* If you want to use a proxy optimized for JP, please DM to `valkyrie#7092`.
+* Forked from https://github.com/caali-hackerman/tera-proxy.
 
 # Installation instructions
-* Download and run the setup from the #proxy channel in the Discord server linked above. A manual installation is possible, but not recommended!
 * The first auto-update after installing the proxy or new mods may take a few seconds. This is because all required files will be downloaded automatically.
-* The most popular modules are already pre-installed for your convenience - check out `bin/node_modules/`. If you don't want to use a particular mod, just delete the corresponding folder or prefix its folder name with an underscore (`_`).
+* The most popular modules are already pre-installed for your convenience - check out `mods/`. If you don't want to use a particular mod, just delete the corresponding folder or prefix its folder name with an underscore (`_`).
 * Run `TeraProxy.bat` *as Administrator*, then start the game
 
 # Popular and fully compatible modules
-Almost all tera-proxy modules are compatible with my proxy. For an always up-to-date list, check out [my Discord server](https://discord.gg/dUNDDtw)!
+Almost all tera-proxy modules are compatible with my proxy. For an always up-to-date list, check out [caali's Discord server](https://discord.gg/dUNDDtw)!
 
 ## Core Modules (always installed)
 * [Command (core module, always installed)](https://github.com/caali-hackerman/command)
@@ -86,8 +85,8 @@ Almost all tera-proxy modules are compatible with my proxy. For an always up-to-
 * [Party Death Markers (Owyn's fork)](https://github.com/Owyn/party_death_marker_pointers)
 * [No More Annoying Titles](https://github.com/SaltyMonkey/NoMoreAnnoyingTitles)
 * [Chat-Memeizer](https://github.com/SaltyMonkey/chat-mememizer)
-* [Auto Whisper] (https://github.com/poor-Nurd/Auto-Whisper)
-* [Server Identifier] (https://github.com/poor-Nurd/Server-identifier)
+* [Auto Whisper](https://github.com/poor-Nurd/Auto-Whisper)
+* [Server Identifier](https://github.com/poor-Nurd/Server-identifier)
 * Bern's scripts
 * Kasea's Ping Remover
 * ... and many more
