@@ -12,14 +12,14 @@
     "bin/hosts.js": "2d1592299406dc7e0f082c30809236c305226766e4d26afad698899c646a80ed",
     "bin/netstat.js": "2b7b5c825c82833403684545fc9b9cfc57cb878fa782bbde860805984119b6cb",
     "bin/proxy.js": "8b8aa5219367ff3f18b2bb9421b48cab4e4506711a0e3ad2d83ae0fadec9b193",
-    "bin/regions.js": "9e51e6b45a3bb7def6a1ccffce57925ba769c208f59f79aa5f9106bf2c8110e7",
+    "bin/regions.js": "657b8494ebf974ff9892203f3ee474b8a1333b939c272579b0fa6a9862f2f4aa",
     "bin/utils.js": "33f639991992a7a7a092a490eccec0522f62dd58a837c5bc5fb164a1151f2e3b",
     "bin/update.js": "9250659623c41d4bb8861263bb7434080b9c969f64c64c13f6461610406e8c0e",
     "bin/update-self.js": "3e13eb59a366316ab2f9bbab484a3f76f9cdfeac2ae267c47e64da18d31d0c57",
     "bin/gui/main.js": "9ca71409436f4c7508e7bfe0ba49570ceb10937e6d5e1b5b185cba6ae0b5659a",
-    "bin/gui/index.html": "b1c10ee3ea7c25924b461a7ccdaf2b371afe8f2198afa73b4eefd2cdace49880",
+    "bin/gui/index.html": "ccc4457a8a32faa1e16e80dfee662f0b7d96474d2ced9fca68bf0c223314b9af",
     "bin/gui/icon.png": "414bb8e8a84a8c26da11087b7e845f8a85651fc92e64652c956dcf4a949bc791",
-    "bin/gui/css/main.css": "b07a7231e583ef68f52712be237a8c849d139719ba891881db1718cd31bd2c1a",
+    "bin/gui/css/main.css": "9ce0a05cb5d3c97ac6cb7e8c0599783ef643c78935bdbac2966113520030a5f4",
     "bin/gui/css/themes/black.css": "16e24ddf80a236c4318c1e6630538b962b64114ff6e1ed911ff50be2e379299f",
     "bin/gui/css/themes/white.css": "2aa8ee04f879e6f13279c3f6bbee3754c47c987702405d6cef896108de8bbc43",
     "bin/gui/css/themes/pink.css": "5aa939da540109b4438eaf365f1ba1a8012d7f8cbd2e93512b879b50b1349569",
@@ -57,6 +57,10 @@
     "bin/servers/servers-kr.json": {
       "overwrite": false,
       "hash": "b57e307f301fef6b41a3ba232f2f95647341ef0728ac05a12098f8958418be97"
+    },
+    "bin/servers/servers-kr-classic.json": {
+      "overwrite": false,
+      "hash": "83f9f2627ea5dadd09b54db710bccb6232288edf28cdd0b03ec427c9b9f55cb2"
     },
     "bin/servers/servers-kr-test.json": {
       "overwrite": false,
@@ -110,8 +114,8 @@
     "node_modules/tera-data-parser/lib/logger.js": "944c1e5960af3c7975a79d6ad9c004677b420a8216ced37fe879f8a94647854f",
     "node_modules/tera-data-parser/lib/parsers/def.js": "e7318f97637c652fa83620f6badf7bc2a9dab46a97e69099ae668a821e28959f",
     "node_modules/tera-data-parser/lib/parsers/map.js": "232d6e2d10229746b1b9bc49776283b90abc5ef65afcfcc136ab2a1194d3ef34",
-    "node_modules/tera-data-parser/lib/protocol/index.js": "2eb6db6ce7f40ebf42bb0e24b139e993a7ecf001f23b4f962a8fabcedb437d15",
-    "node_modules/tera-data-parser/lib/protocol/stream.js": "cce67513ff1ddbb940aa85d37479a0c53c2067bf6a6ce53dccad39a29e26191e",
+    "node_modules/tera-data-parser/lib/protocol/index.js": "bc791d93be0b57ae71f5742e3d796aa41957cdc39c6fc1a814ed85af9b95173e",
+    "node_modules/tera-data-parser/lib/protocol/stream.js": "05a48b13ad3f72f371c73f3639d48cf420436f09f6ec73bcfaa0d6d1afff6f99",
     "node_modules/tera-data-parser/lib/protocol/types/index.js": "63c3b0d190ddf64b12f6cddbc2ddc0769c1c9c14bc7634940930e86c71720e1d",
     "node_modules/tera-data-parser/lib/protocol/types/skillid.js": "b1de2de5dfb47af11435e8ae7f2d45991e2a08383b4342cb0ed69b3398b33046",
     "node_modules/tera-data-parser/lib/protocol/types/customize.js": "1e4b3e55e2e6dca1ae2950ec29dc5d90eefe5cba231b84c496cbd1b2b7da087a",
