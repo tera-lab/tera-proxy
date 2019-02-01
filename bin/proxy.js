@@ -8,7 +8,7 @@
             return 'EU';
         case 'KOR':
             return 'KR';
-        case 'JP':
+        case 'JPN':
             return 'JP';
         case 'TW':
             return 'TW';
@@ -32,8 +32,8 @@ function ProxyTagFromLanguage(language) {
             return ' (Proxy)';
         case 'KOR':
             return ' (대리)';
-        case 'JP':
-            return '（プロキシ）';
+        case 'JPN':
+            return '（Proxy）';
         case 'TW':
             return '（代理）';
         case 'THA':
@@ -135,23 +135,21 @@ class TeraProxy {
                 }
                 case 'get_sls': {
                     if (client.info) {
-                        let proxy_servers = data.servers.map(server => {
-                            let patched_server = Object.assign({}, server);
-
+                        const proxy_servers = data.servers.slice().map(server => {
                             if (!this.config.noslstags) {
                                 const tag = ProxyTagFromLanguage(client.info.language);
-                                patched_server.name += tag;
-                                patched_server.title += tag;
+                                server.name += tag;
+                                server.title += tag;
                             }
 
                             const region = RegionFromLanguage(client.info.language);
                             const platform = (client.info.major_patch <= 27) ? 'classic' : 'pc';
                             const redirected_server = this.redirect(server.id, server.name, server.ip, server.port, region, region.toLowerCase(), platform);
-                            patched_server.ip = redirected_server.ip;
-                            patched_server.port = redirected_server.port;
+                            server.ip = redirected_server.ip;
+                            server.port = redirected_server.port;
 
-                            return patched_server;
-                        });
+                            return server;
+                        }).sort((a, b) => a.id - b.id);
 
                         data.servers = !this.config.noslstags ? [...proxy_servers, ...data.servers] : proxy_servers;
                     }
