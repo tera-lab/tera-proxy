@@ -60,7 +60,41 @@ class TeraProxy {
         this.connectionManager = new ConnectionManager(moduleFolder);
 
         const ClientInterfaceServer = require('tera-client-interface');
-        this.clientInterfaceServer = new ClientInterfaceServer('127.0.0.10', 9250, client => this.onClientInterfaceConnected(client));
+        this.clientInterfaceServer = new ClientInterfaceServer('127.0.0.10', 9250,
+            client => {
+                this.onClientInterfaceConnected(client);
+            },
+            () => {
+                // TODO: this is a dirty hack, implement a proper API for client/startup mods
+                const { listModuleInfos } = require('tera-proxy-game').ModuleInstallation;
+                listModuleInfos(this.moduleFolder).forEach(modInfo => {
+                    if (modInfo.options.loadOn === 'startup') {
+                        console.log(`[proxy] Loading startup module ${modInfo.name}`);
+                        try {
+                            const modConstructor = require(modInfo.path);
+                            modConstructor(null);
+                        } catch (e) {
+                            console.log(`[proxy] Error loading startup module ${modInfo.name}:`);
+                            console.log(e);
+                        }
+                    }
+                });
+
+                console.log('[proxy] Ready, waiting for game client start!');
+                this.running = true;
+            },
+            e => {
+                console.log('[proxy] ERROR: Unable to start client interface server.');
+                switch (e.code) {
+                    case 'EADDRINUSE':
+                        console.log('[proxy] ERROR: Another instance of tera-proxy is already running. Please close it and try again!');
+                        break;
+                    default:
+                        console.log(e);
+                        break;
+                }
+            }
+        );
     }
 
     destructor() {
@@ -81,24 +115,7 @@ class TeraProxy {
     }
 
     run() {
-        this.running = true;
-
-        // TODO: this is a dirty hack, implement a proper API for client/startup mods
-        const { listModuleInfos } = require('tera-proxy-game').ModuleInstallation;
-        listModuleInfos(this.moduleFolder).forEach(modInfo => {
-            if (modInfo.options.loadOn === 'startup') {
-                console.log(`[proxy] Loading startup module ${modInfo.name}`);
-                try {
-                    const modConstructor = require(modInfo.path);
-                    modConstructor(null);
-                } catch (e) {
-                    console.log(`[proxy] Error loading startup module ${modInfo.name}:`);
-                    console.log(e);
-                }
-            }
-        });
-
-        console.log('Ready, waiting for game client start!');
+        this.clientInterfaceServer.run();
     }
 
     get hasActiveConnections() {

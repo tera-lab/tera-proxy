@@ -1,5 +1,5 @@
 const path = require('path');
-const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, shell } = require('electron');
 const ModuleFolder = path.join(__dirname, "..", "mods");
 
 // Configuration
@@ -45,7 +45,7 @@ function Migration() {
 
 // Installed mod management
 const AvailableModuleListUrl = "https://raw.githubusercontent.com/caali-hackerman/tera-mods/master/modulelist.json";
-const { listModuleInfos, installModule, uninstallModule, toggleAutoUpdate } = require('tera-proxy-game').ModuleInstallation;
+const { listModuleInfos, installModule, uninstallModule, toggleAutoUpdate, toggleLoad } = require('tera-proxy-game').ModuleInstallation;
 
 let CachedAvailableModuleList = null;
 async function getInstallableMods(forceRefresh = false) {
@@ -213,6 +213,12 @@ ipcMain.on('install mod', (event, modInfo) => {
     getInstallableMods().then(mods => event.sender.send('set installable mods', mods));
 });
 
+ipcMain.on('toggle mod load', (event, modInfo) => {
+    toggleLoad(modInfo);
+    log(`${modInfo.disabled ? 'Enabled' : 'Disabled'} "${modInfo.rawName}"`);
+    event.sender.send('set mods', listModuleInfos(ModuleFolder));
+});
+
 ipcMain.on('toggle mod autoupdate', (event, modInfo) => {
     toggleAutoUpdate(modInfo);
     log(`${modInfo.autoUpdateDisabled ? 'Enabled' : 'Disabled'} automatic updates for "${modInfo.rawName}"`);
@@ -225,6 +231,9 @@ ipcMain.on('uninstall mod', (event, modInfo) => {
     event.sender.send('set mods', listModuleInfos(ModuleFolder));
 });
 
+ipcMain.on('show mods folder', () => {
+    shell.openItem(ModuleFolder);
+});
 
 // GUI
 class TeraProxyGUI {
