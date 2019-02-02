@@ -135,7 +135,7 @@ class TeraProxy {
                 }
                 case 'get_sls': {
                     if (client.info) {
-                        const proxy_servers = data.servers.map(server => {
+                        const proxy_servers = data.servers.sort((a, b) => a.id - b.id).map(server => {
                             let patched_server = Object.assign({}, server);
 
                             if (!this.config.noslstags) {
@@ -151,7 +151,7 @@ class TeraProxy {
                             patched_server.port = redirected_server.port;
 
                             return patched_server;
-                        }).sort((a, b) => a.id - b.id);
+                        });
 
                         data.servers = !this.config.noslstags ? [...proxy_servers, ...data.servers] : proxy_servers;
                     }
