@@ -9,7 +9,7 @@
     "bin/loader-console.js": "47813dccfb35bd2bf17a3699c44859630a3ce2e3451ee8400b58a4f9739c33d5",
     "bin/loader-gui.js": "d7c338f413002e2579280ad5db804d85667eb772924f2fdc1f45cfb89ba98d7b",
     "bin/connectionManager.js": "a3d33043402e918801f02b57dd657d43d3b5c00dfdc0307e5de61ba82b7c3fdc",
-    "bin/proxy.js": "1e7da67177a0d7eeb56a680aeac446ef7794d989530b71b84915b81c97a2f1ac",
+    "bin/proxy.js": "8e3c8a3ace715676026392bfa689869095c6497dd13f13457f84dcebb2e126d6",
     "bin/utils.js": "33f639991992a7a7a092a490eccec0522f62dd58a837c5bc5fb164a1151f2e3b",
     "bin/update.js": "591bcfeb5774a70f8ad633d36414dd166a84caed171637c9dc92478024c22fc8",
     "bin/update-self.js": "3e13eb59a366316ab2f9bbab484a3f76f9cdfeac2ae267c47e64da18d31d0c57",

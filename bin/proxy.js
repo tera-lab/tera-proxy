@@ -135,20 +135,22 @@ class TeraProxy {
                 }
                 case 'get_sls': {
                     if (client.info) {
-                        const proxy_servers = data.servers.slice().map(server => {
+                        const proxy_servers = data.servers.map(server => {
+                            let patched_server = Object.assign({}, server);
+
                             if (!this.config.noslstags) {
                                 const tag = ProxyTagFromLanguage(client.info.language);
-                                server.name += tag;
-                                server.title += tag;
+                                patched_server.name += tag;
+                                patched_server.title += tag;
                             }
 
                             const region = RegionFromLanguage(client.info.language);
                             const platform = (client.info.major_patch <= 27) ? 'classic' : 'pc';
                             const redirected_server = this.redirect(server.id, server.name, server.ip, server.port, region, region.toLowerCase(), platform);
-                            server.ip = redirected_server.ip;
-                            server.port = redirected_server.port;
+                            patched_server.ip = redirected_server.ip;
+                            patched_server.port = redirected_server.port;
 
-                            return server;
+                            return patched_server;
                         }).sort((a, b) => a.id - b.id);
 
                         data.servers = !this.config.noslstags ? [...proxy_servers, ...data.servers] : proxy_servers;
