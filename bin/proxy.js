@@ -59,8 +59,8 @@ class TeraProxy {
         const ConnectionManager = require('./connectionManager');
         this.connectionManager = new ConnectionManager(moduleFolder);
 
-        const ClientInterfaceServer = require('tera-client-interface');
-        this.clientInterfaceServer = new ClientInterfaceServer('127.0.0.10', 9250,
+        const { TeraClientInterfaceServer, TeraDllInjector } = require('tera-client-interface');
+        this.clientInterfaceServer = new TeraClientInterfaceServer('127.0.0.10', 9250,
             client => {
                 this.onClientInterfaceConnected(client);
             },
@@ -95,6 +95,7 @@ class TeraProxy {
                 }
             }
         );
+        new TeraDllInjector(this.config.bypassXigncode);
     }
 
     destructor() {

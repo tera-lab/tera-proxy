@@ -4,5 +4,6 @@
     "devmode": false,
     "noselfupdate": false,
     "noupdate": false,
-    "noslstags": false
+    "noslstags": false,
+    "bypassXigncode": false
 }
