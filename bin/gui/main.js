@@ -175,6 +175,7 @@ jQuery(($) => {
         $('#noselfupdate').prop('checked', Settings.noselfupdate);
         $('#devmode').prop('checked', Settings.devmode);
         $('#noslstags').prop('checked', Settings.noslstags);
+        $('#bypassXigncode').prop('checked', Settings.bypassXigncode);
         $('head').append(`<link rel="stylesheet" href="css/themes/${Themes.indexOf(Settings.gui.theme) < 0 ? Themes[0] : Settings.gui.theme}.css">`);
     }
 
@@ -242,6 +243,10 @@ jQuery(($) => {
 
     $('#noslstags').click(() => {
         updateSetting('noslstags', $('#noslstags').is(':checked'));
+    });
+
+    $('#bypassXigncode').click(() => {
+        updateSetting('bypassXigncode', $('#bypassXigncode').is(':checked'));
     });
 
     Themes.forEach(theme => {
