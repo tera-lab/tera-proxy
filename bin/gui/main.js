@@ -28,7 +28,10 @@ jQuery(($) => {
     // ----------------------------- MAIN ---------------------------------
     // --------------------------------------------------------------------
     $('#minimize-btn').click(() => {
-        remote.getCurrentWindow().minimize();
+        if (Settings.gui.minimizetotray)
+            remote.getCurrentWindow().hide();
+        else
+            remote.getCurrentWindow().minimize();
     });
 
     $('#close-btn').click(() => {
@@ -176,6 +179,7 @@ jQuery(($) => {
         $('#devmode').prop('checked', Settings.devmode);
         $('#noslstags').prop('checked', Settings.noslstags);
         $('#bypassXigncode').prop('checked', Settings.bypassXigncode);
+        $('#minimizetotray').prop('checked', Settings.gui.minimizetotray);
         $('head').append(`<link rel="stylesheet" href="css/themes/${Themes.indexOf(Settings.gui.theme) < 0 ? Themes[0] : Settings.gui.theme}.css">`);
     }
 
@@ -247,6 +251,10 @@ jQuery(($) => {
 
     $('#bypassXigncode').click(() => {
         updateSetting('bypassXigncode', $('#bypassXigncode').is(':checked'));
+    })
+
+    $('#minimizetotray').click(() => {
+        updateGUISetting('minimizetotray', $('#minimizetotray').is(':checked'));
     });
 
     Themes.forEach(theme => {
@@ -294,7 +302,7 @@ jQuery(($) => {
                         ${!modInfo.isCoreModule ? `<a href="#" id="${uninstallId}" class="moduleBody buttons uninstall"></a>` : ''}
                         ${modInfo.donationUrl ? `<a href="#" id="${donationId}" class="moduleBody buttons donate"></a>` : ''}
                         ${modInfo.supportUrl ? `<a href="#" id="${infoId}" class="moduleBody buttons info"></a>` : ''}
-                        ${(!modInfo.isCoreModule && modInfo.compatibility === 'compatible') ? `<a href="#" id="${updateId}" class="moduleBody buttons update${modInfo.autoUpdateDisabled ? 'Disabled' : 'Enabled'}"></a>` : ''}
+                        ${(!modInfo.isCoreModule && modInfo.compatibility === 'compatible') ? `<a href="#" id="${updateId}" class="moduleBody buttons update${modInfo.disableAutoUpdate ? 'Disabled' : 'Enabled'}"></a>` : ''}
                         ${(!modInfo.isCoreModule && modInfo.compatibility === 'compatible') ? `<a href="#" id="${enabledId}" class="moduleBody buttons load${modInfo.disabled ? 'Disabled' : 'Enabled'}"></a>` : ''}
                     </div>
                 </div>`
