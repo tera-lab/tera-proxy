@@ -153,23 +153,26 @@ class TeraProxy {
                 }
                 case 'get_sls': {
                     if (client.info) {
-                        const proxy_servers = data.servers.sort((a, b) => a.id - b.id).map(server => {
-                            let patched_server = Object.assign({}, server);
+                        const proxy_servers = data.servers
+                            .sort((a, b) => a.id - b.id)
+                            .filter(server => !data.servers.some(other_server => other_server.id === server.id && other_server.ip === this.listenIp))
+                            .map(server => {
+                                let patched_server = Object.assign({}, server);
 
-                            if (!this.config.noslstags) {
-                                const tag = ProxyTagFromLanguage(client.info.language);
-                                patched_server.name += tag;
-                                patched_server.title += tag;
-                            }
+                                if (!this.config.noslstags) {
+                                    const tag = ProxyTagFromLanguage(client.info.language);
+                                    patched_server.name += tag;
+                                    patched_server.title += tag;
+                                }
 
-                            const region = RegionFromLanguage(client.info.language);
-                            const platform = (client.info.major_patch <= 27) ? 'classic' : 'pc';
-                            const redirected_server = this.redirect(server.id, server.name, server.ip, server.port, region, region.toLowerCase(), platform, client.info.major_patch, client.info.minor_patch);
-                            patched_server.ip = redirected_server.ip;
-                            patched_server.port = redirected_server.port;
+                                const region = RegionFromLanguage(client.info.language);
+                                const platform = (client.info.major_patch <= 27) ? 'classic' : 'pc';
+                                const redirected_server = this.redirect(server.id, server.name, server.ip, server.port, region, region.toLowerCase(), platform, client.info.major_patch, client.info.minor_patch);
+                                patched_server.ip = redirected_server.ip;
+                                patched_server.port = redirected_server.port;
 
-                            return patched_server;
-                        });
+                                return patched_server;
+                            });
 
                         data.servers = !this.config.noslstags ? [...proxy_servers, ...data.servers] : proxy_servers;
                     }
