@@ -101,7 +101,7 @@ if (ProxyConfig.noupdate) {
     RunProxy(ModuleFolder, ProxyConfig);
 } else {
     const autoUpdate = require("./update");
-    autoUpdate(ModuleFolder, ProxyConfig.updatelog, true).then(updateResult => {
+    autoUpdate(ModuleFolder, ProxyConfig.updatelog, !ProxyConfig.noupdatelimit).then(updateResult => {
         for (let mod of updateResult["legacy"])
             console.log("[update] WARNING: Module %s does not support auto-updating!", mod.name);
         for (let mod of updateResult["failed"])

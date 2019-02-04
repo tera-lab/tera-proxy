@@ -96,7 +96,7 @@ async function StartProxy(ModuleFolder, ProxyConfig) {
         const autoUpdate = require("./update");
 
         try {
-            const updateResult = await autoUpdate(ModuleFolder, ProxyConfig.updatelog, true);
+            const updateResult = await autoUpdate(ModuleFolder, ProxyConfig.updatelog, !ProxyConfig.noupdatelimit);
 
             for (let mod of updateResult["legacy"])
                 log(`[update] WARNING: Module ${mod.name} does not support auto-updating!`);
