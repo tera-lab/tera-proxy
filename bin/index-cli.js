@@ -2,7 +2,7 @@ async function updateSelf() {
     delete require.cache[require.resolve('./update-self')];
     const autoUpdateSelf = require("./update-self");
     try {
-        let result = await autoUpdateSelf();
+        let result = await autoUpdateSelf(console);
         if (result)
             return updateSelf();
         else
@@ -14,13 +14,8 @@ async function updateSelf() {
 
 updateSelf().then((result) => {
     if (result) {
-        try {
-            // Preparation for smooth migration to new boot sequence
-            require(process.versions.electron ? './index-gui' : './index-cli');
-        } catch (_) {
-            require("./loader");
-        }
+        require("./loader-cli");
     } else {
-        console.log("Failed to auto-update the proxy, terminating...");
+        console.log("Failed to auto-update the proxy!");
     }
 });

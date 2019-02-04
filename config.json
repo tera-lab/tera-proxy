@@ -1,8 +1,10 @@
 {
-    "region": "JP",
     "branch": "master",
     "updatelog": false,
     "devmode": false,
     "noselfupdate": false,
-    "noupdate": false
+    "noupdate": false,
+    "noupdatelimit": false,
+    "noslstags": false,
+    "bypassXigncode": false
 }

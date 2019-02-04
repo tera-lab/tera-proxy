@@ -1,27 +1,51 @@
 const path = require('path');
-const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, shell } = require('electron');
+const ModuleFolder = path.join(__dirname, "..", "mods");
 
 // Configuration
+function LoadConfiguration() {
+    try {
+        return require('./config').loadConfig();
+    } catch (_) {
+        const { dialog } = require('electron');
+
+        dialog.showMessageBox({
+            type: 'error',
+            title: 'Invalid settings file!',
+            message: `The config.json file in your proxy folder is malformed. Try to fix it yourself, delete it to generate a new one, or ask in ${global.TeraProxy.SupportUrl} for help!\n\nProxy will now be terminated.`
+        });
+
+        app.quit();
+    }
+}
+
 function SaveConfiguration(newConfig) {
     global.TeraProxy.DevMode = !!newConfig.devmode;
     global.TeraProxy.GUITheme = newConfig.gui.theme;
     require('./config').saveConfig(newConfig);
 }
 
-// Region
-function LoadRegion(region) {
+// Migration
+function Migration() {
     try {
-        return require('./config').loadRegion(region);
+        const { ProxyMigration } = require('./migration');
+        ProxyMigration();
     } catch (e) {
-        showError(`ERROR: Unable to load region information: ${e}`);
-        showError(`ERROR: Try to fix it yourself or ask here: ${global.TeraProxy.SupportUrl}!`);
-        process.exit(1);
+        const { dialog } = require('electron');
+
+        dialog.showMessageBox({
+            type: 'error',
+            title: 'Migration error!',
+            message: `Unable to migrate files from an old version of Tera-Proxy.\nPlease reinstall a clean copy using the latest installer or ask in ${global.TeraProxy.SupportUrl} for help!\n\nProxy will now be terminated.`
+        });
+
+        app.quit();
     }
 }
 
 // Installed mod management
 const AvailableModuleListUrl = "https://raw.githubusercontent.com/caali-hackerman/tera-mods/master/modulelist.json";
-const { listModuleInfos, installModule, uninstallModule, toggleAutoUpdate } = require('tera-proxy-game').ModuleInstallation;
+const { listModuleInfos, installModule, uninstallModule, toggleAutoUpdate, toggleLoad } = require('tera-proxy-game').ModuleInstallation;
 
 let CachedAvailableModuleList = null;
 async function getInstallableMods(forceRefresh = false) {
@@ -38,24 +62,27 @@ async function getInstallableMods(forceRefresh = false) {
 
 // Proxy Main
 let proxy = null;
-function _StartProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig) {
-    if (proxy)
+let proxyRunning = false;
+function _StartProxy(ModuleFolder, ProxyConfig) {
+    if (proxy || proxyRunning)
         return false;
 
     const TeraProxy = require('./proxy');
-    proxy = new TeraProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig);
+    proxy = new TeraProxy(ModuleFolder, ProxyConfig);
     try {
         proxy.run();
+        proxyRunning = true;
         return true;
     } catch (_) {
         console.error('[proxy] Unable to start proxy!');
         proxy = null;
+        proxyRunning = false;
         return false;
     }
 }
 
-async function StartProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig) {
-    if (proxy)
+async function StartProxy(ModuleFolder, ProxyConfig) {
+    if (proxy || proxyRunning)
         return false;
 
     if (ProxyConfig.noupdate) {
@@ -64,12 +91,12 @@ async function StartProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig) {
         log("!!!!! THERE WILL BE NO SUPPORT FOR ANY KIND OF PROBLEM THAT !!!!!");
         log("!!!!!      YOU MIGHT ENCOUNTER AS A RESULT OF DOING SO      !!!!!");
         log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        return _StartProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig);
+        return _StartProxy(ModuleFolder, ProxyConfig);
     } else {
         const autoUpdate = require("./update");
 
         try {
-            const updateResult = await autoUpdate(ModuleFolder, ProxyConfig.updatelog, true, ProxyRegionConfig.idShort);
+            const updateResult = await autoUpdate(ModuleFolder, ProxyConfig.updatelog, !ProxyConfig.noupdatelimit);
 
             for (let mod of updateResult["legacy"])
                 log(`[update] WARNING: Module ${mod.name} does not support auto-updating!`);
@@ -81,7 +108,7 @@ async function StartProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig) {
             delete require.cache[require.resolve("tera-data-parser")];
             delete require.cache[require.resolve("tera-proxy-game")];
 
-            return _StartProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig);
+            return _StartProxy(ModuleFolder, ProxyConfig);
         } catch (e) {
             error(`ERROR: Unable to auto-update: ${e}`);
             return false;
@@ -90,11 +117,12 @@ async function StartProxy(ModuleFolder, ProxyConfig, ProxyRegionConfig) {
 }
 
 async function StopProxy() {
-    if (!proxy)
+    if (!proxy || !proxyRunning)
         return false;
 
     proxy.destructor();
     proxy = null;
+    proxyRunning = false;
     return true;
 }
 
@@ -135,20 +163,26 @@ ipcMain.on('init', (event, _) => {
 
     if (config.gui.autostart) {
         log("Starting proxy...");
-        StartProxy(ModuleFolder, config, LoadRegion(config.region)).then((result) => {
+        StartProxy(ModuleFolder, config).then((result) => {
             event.sender.send('proxy running', result);
         });
     }
 });
 
 ipcMain.on('start proxy', (event, _) => {
+    if (proxy || proxyRunning)
+        return;
+
     log("Starting proxy...");
-    StartProxy(ModuleFolder, config, LoadRegion(config.region)).then((result) => {
+    StartProxy(ModuleFolder, config).then((result) => {
         event.sender.send('proxy running', result);
     });
 });
 
 ipcMain.on('stop proxy', (event, _) => {
+    if (!proxy || !proxyRunning)
+        return;
+
     log("Stopping proxy...");
     StopProxy().then(() => {
         event.sender.send('proxy running', false);
@@ -179,9 +213,15 @@ ipcMain.on('install mod', (event, modInfo) => {
     getInstallableMods().then(mods => event.sender.send('set installable mods', mods));
 });
 
+ipcMain.on('toggle mod load', (event, modInfo) => {
+    toggleLoad(modInfo);
+    log(`${modInfo.disabled ? 'Enabled' : 'Disabled'} "${modInfo.rawName}"`);
+    event.sender.send('set mods', listModuleInfos(ModuleFolder));
+});
+
 ipcMain.on('toggle mod autoupdate', (event, modInfo) => {
     toggleAutoUpdate(modInfo);
-    log(`${modInfo.autoUpdateDisabled ? 'Enabled' : 'Disabled'} automatic updates for "${modInfo.rawName}"`);
+    log(`${modInfo.disableAutoUpdate ? 'Enabled' : 'Disabled'} automatic updates for "${modInfo.rawName}"`);
     event.sender.send('set mods', listModuleInfos(ModuleFolder));
 });
 
@@ -191,6 +231,9 @@ ipcMain.on('uninstall mod', (event, modInfo) => {
     event.sender.send('set mods', listModuleInfos(ModuleFolder));
 });
 
+ipcMain.on('show mods folder', () => {
+    shell.openItem(ModuleFolder);
+});
 
 // GUI
 class TeraProxyGUI {
@@ -206,6 +249,31 @@ class TeraProxyGUI {
                 this.window.restore();
             this.window.focus();
             return;
+        }
+
+        // Migration
+        Migration();
+
+        // Load configuration
+        config = LoadConfiguration();
+        global.TeraProxy.GUIMode = true;
+        global.TeraProxy.DevMode = !!config.devmode;
+
+        if (!config.gui) {
+            config.gui = {
+                enabled: true,
+                theme: 'black',
+                autostart: false
+            };
+
+            SaveConfiguration(config);
+        } else {
+            if (config.gui.logtimes === undefined) {
+                config.gui.logtimes = true;
+                SaveConfiguration(config);
+            }
+
+            global.TeraProxy.GUITheme = config.gui.theme || 'black';
         }
 
         // Initialize main window
@@ -280,7 +348,6 @@ class TeraProxyGUI {
 }
 
 // Main
-let ModuleFolder;
 let config;
 let gui;
 
@@ -291,60 +358,45 @@ function showError(error) {
 }
 
 function log(msg) {
+    if (msg.length === 0)
+        return;
+
     if (gui)
         gui.log(msg);
 }
 
-module.exports = function LoaderGUI(ModFolder, ProxyConfig, ProxyRegionConfig) {
-    // Enforce single instance of GUI
-    if (!app.requestSingleInstanceLock()) {
-        app.quit();
-        return;
-    } else {
-        app.on('second-instance', () => {
-            if (gui)
-                gui.show();
-        });
-    }
+// Main
+const { initGlobalSettings } = require('./utils');
+initGlobalSettings(false);
 
-    // Boot GUI
-    global.TeraProxy.GUIMode = true;
-
-    ModuleFolder = ModFolder;
-    config = ProxyConfig;
-    if (!config.gui) {
-        config.gui = {
-            enabled: true,
-            theme: 'black',
-            autostart: false
-        };
-
-        SaveConfiguration(config);
-    } else {
-        if (config.gui.logtimes === undefined) {
-            config.gui.logtimes = true;
-            SaveConfiguration(config);
-        }
-
-        global.TeraProxy.GUITheme = ProxyConfig.gui.theme || 'black';
-    }
-
-    gui = new TeraProxyGUI;
-
-    if (app.isReady()) {
-        gui.show();
-    } else {
-        app.on('ready', () => {
+// Enforce single instance of GUI
+if (!app.requestSingleInstanceLock()) {
+    app.quit();
+    return;
+} else {
+    app.on('second-instance', () => {
+        if (gui)
             gui.show();
-        });
-    }
-
-    app.on('window-all-closed', () => {
-        if (process.platform !== 'darwin')
-            app.quit();
     });
+}
 
-    app.on('activate', () => {
+// Boot GUI
+gui = new TeraProxyGUI;
+
+if (app.isReady()) {
+    gui.show();
+} else {
+    app.on('ready', () => {
         gui.show();
     });
-};
+}
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin')
+        app.quit();
+});
+
+app.on('activate', () => {
+    gui.show();
+});
+

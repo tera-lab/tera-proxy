@@ -27,6 +27,7 @@
                 <li class="tab-link nodrag" tabname="newmods">Get More Mods</li>
                 <li class="tab-link nodrag" tabname="settings">Proxy Settings</li>
                 <li class="tab-link nodrag" tabname="help" tabclickonly="true">Need Help?</li>
+                <li class="tab-link nodrag" tabname="modsfolder" tabclickonly="true">Show Mods Folder</li>
                 <li class="tab-link nodrag" tabname="credits">Credits</li>
                 <a class="nodrag" id="startproxy">Start Proxy</a>
             </ul>
@@ -82,22 +83,6 @@
                     <div id="theme_pink" class="theme pink"></div>
                 </div>
                 <div>
-                    <a>Region</a>
-                    <select id="regions">
-                        <option>NA</option>
-                        <option>EU</option>
-                        <option>RU</option>
-                        <option>KR</option>
-                        <option>KR-CLASSIC</option>
-                        <option>JP</option>
-                        <option>TW</option>
-                        <option>TH</option>
-                        <option>SE</option>
-                        <option>EU-TEST</option>
-                        <option>KR-TEST</option>
-                    </select>
-                </div>
-                <div>
                     <a>Automatically run proxy on startup</a>
                     <input id="autostart" type="checkbox">
                 </div>
@@ -120,6 +105,18 @@
                 <div>
                     <a>Enable Developer Mode</a>
                     <input id="devmode" type="checkbox">
+                </div>
+                <div>
+                    <a>Hide proxy tag in server list</a>
+                    <input id="noslstags" type="checkbox">
+                </div>
+                <div>
+                    <a>Enable Xigncode Bypass</a>
+                    <input id="bypassXigncode" type="checkbox">
+                </div>
+                <div>
+                    <a>Minimize proxy to system tray</a>
+                    <input id="minimizetotray" type="checkbox">
                 </div>
             </div>
 

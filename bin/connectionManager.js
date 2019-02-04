@@ -20,12 +20,8 @@ function onConnectionError(err) {
 }
 
 class ConnectionManager {
-    constructor(moduleFolder, region, regionShort, platform) {
+    constructor(moduleFolder) {
         this.moduleFolder = moduleFolder;
-        this.region = region;
-        this.regionShort = regionShort;
-        this.platform = platform;
-
         this.activeConnections = new Set;
     }
 
@@ -34,15 +30,17 @@ class ConnectionManager {
         this.activeConnections.clear();
     }
 
-    start(id, target, socket) {
+    start(id, target, socket, region, regionShort, platform, majorPatch, minorPatch) {
         socket.setNoDelay(true);
 
         const connection = new Connection(this.moduleFolder, {
             "serverId": id,
-            "region": this.region,
-            "regionShort": this.regionShort,
-            "console": this.platform === "console",
-            "classic": this.platform === "classic",
+            "region": region,
+            "regionShort": regionShort,
+            "majorPatch": majorPatch,
+            "minorPatch": minorPatch,
+            "console": platform === "console",
+            "classic": platform === "classic",
         });
 
         const client = new RealClient(connection, socket);

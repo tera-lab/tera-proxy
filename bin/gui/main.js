@@ -28,7 +28,10 @@ jQuery(($) => {
     // ----------------------------- MAIN ---------------------------------
     // --------------------------------------------------------------------
     $('#minimize-btn').click(() => {
-        remote.getCurrentWindow().minimize();
+        if (Settings.gui.minimizetotray)
+            remote.getCurrentWindow().hide();
+        else
+            remote.getCurrentWindow().minimize();
     });
 
     $('#close-btn').click(() => {
@@ -168,13 +171,15 @@ jQuery(($) => {
 
     function onSettingsChanged(newSettings) {
         Settings = newSettings;
-        $(`option:contains(${Settings.region}):first`).prop('selected', true);
         $('#autostart').prop('checked', Settings.gui.autostart);
         $('#updatelog').prop('checked', Settings.updatelog);
         $('#logtimes').prop('checked', Settings.gui.logtimes);
         $('#noupdate').prop('checked', Settings.noupdate);
         $('#noselfupdate').prop('checked', Settings.noselfupdate);
         $('#devmode').prop('checked', Settings.devmode);
+        $('#noslstags').prop('checked', Settings.noslstags);
+        $('#bypassXigncode').prop('checked', Settings.bypassXigncode);
+        $('#minimizetotray').prop('checked', Settings.gui.minimizetotray);
         $('head').append(`<link rel="stylesheet" href="css/themes/${Themes.indexOf(Settings.gui.theme) < 0 ? Themes[0] : Settings.gui.theme}.css">`);
     }
 
@@ -210,10 +215,6 @@ jQuery(($) => {
     });
 
     // UI events
-    $('#regions').change(() => {
-        updateSetting('region', $('#regions').find(":selected").text());
-    });
-
     $('#autostart').click(() => {
         updateGUISetting('autostart', $('#autostart').is(':checked'));
     });
@@ -244,6 +245,18 @@ jQuery(($) => {
         updateSetting('devmode', $('#devmode').is(':checked'));
     });
 
+    $('#noslstags').click(() => {
+        updateSetting('noslstags', $('#noslstags').is(':checked'));
+    });
+
+    $('#bypassXigncode').click(() => {
+        updateSetting('bypassXigncode', $('#bypassXigncode').is(':checked'));
+    })
+
+    $('#minimizetotray').click(() => {
+        updateGUISetting('minimizetotray', $('#minimizetotray').is(':checked'));
+    });
+
     Themes.forEach(theme => {
         $(`#theme_${theme}`).click(() => {
             $('head>link').filter('[rel="stylesheet"]:last').remove();
@@ -270,11 +283,12 @@ jQuery(($) => {
             const donationId = `moddonate-${escapedName}`;
             const uninstallId = `moduninstall-${escapedName}`;
             const infoId = `modinfo-${escapedName}`;
+            const enabledId = `modenabled-${escapedName}`;
             const updateId = `modupdate-${escapedName}`;
 
             $('.modulesList').append(`
                 <div id="${headerId}" class="moduleHeader">
-                    <div class="moduleHeader name">${displayName(modInfo)}${modInfo.version ? `<span style="font-weight: none; font-size: 14px; font-style: italic"> (${modInfo.version})</span>` : ''}</div>
+                    <div class="moduleHeader name">${modInfo.disabled ? '[DISABLED] ' : ''}${displayName(modInfo)}${modInfo.version ? `<span style="font-weight: none; font-size: 14px; font-style: italic"> (${modInfo.version})</span>` : ''}</div>
                     ${modInfo.author ? `<div class="moduleHeader author">by ${modInfo.author}${modInfo.drmKey ? ' (paid)' : ''}</div>` : ''}
                 </div>
             `);
@@ -288,7 +302,8 @@ jQuery(($) => {
                         ${!modInfo.isCoreModule ? `<a href="#" id="${uninstallId}" class="moduleBody buttons uninstall"></a>` : ''}
                         ${modInfo.donationUrl ? `<a href="#" id="${donationId}" class="moduleBody buttons donate"></a>` : ''}
                         ${modInfo.supportUrl ? `<a href="#" id="${infoId}" class="moduleBody buttons info"></a>` : ''}
-                        ${(!modInfo.isCoreModule && modInfo.compatibility === 'compatible') ? `<a href="#" id="${updateId}" class="moduleBody buttons update${modInfo.autoUpdateDisabled ? 'Disabled' : 'Enabled'}"></a>` :  ''}
+                        ${(!modInfo.isCoreModule && modInfo.compatibility === 'compatible') ? `<a href="#" id="${updateId}" class="moduleBody buttons update${modInfo.disableAutoUpdate ? 'Disabled' : 'Enabled'}"></a>` : ''}
+                        ${(!modInfo.isCoreModule && modInfo.compatibility === 'compatible') ? `<a href="#" id="${enabledId}" class="moduleBody buttons load${modInfo.disabled ? 'Disabled' : 'Enabled'}"></a>` : ''}
                     </div>
                 </div>`
             );
@@ -302,6 +317,15 @@ jQuery(($) => {
             $(`#${infoId}`).on('click', (event) => {
                 event.preventDefault();
                 shell.openExternal(modInfo.supportUrl);
+                return false;
+            });
+
+            $(`#${enabledId}`).on('click', (event) => {
+                event.preventDefault();
+                if (!WaitingForModAction) {
+                    ipcRenderer.send('toggle mod load', modInfo);
+                    WaitingForModAction = true;
+                }
                 return false;
             });
 
@@ -421,6 +445,17 @@ jQuery(($) => {
     addTab(HelpTabName, {
         click: () => {
             shell.openExternal(remote.getGlobal('TeraProxy').SupportUrl);
+        },
+    });
+
+    // --------------------------------------------------------------------
+    // -------------------------- MODS FOLDER TAB -------------------------
+    // --------------------------------------------------------------------
+    const ModsFolderTabName = 'modsfolder';
+
+    addTab(ModsFolderTabName, {
+        click: () => {
+            ipcRenderer.send('show mods folder');
         },
     });
 
