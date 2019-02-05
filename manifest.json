@@ -54,7 +54,7 @@
     "node_modules/process-list/processlist_node_x64_67.node": "cf75e6db5758862ff15090b1ab3c2052af48a5a3ff4e25055db0be789d334c24",
     "node_modules/process-list/processlist-wrapper.js": "c53e8e6b2d185b43a1650d5ff26048186c16bea499229b2c14671e90b64853fe",
     "node_modules/tera-client-interface/index.js": "cfd1be94de11db1cc357ae39d8f6014e38004a988533c3bd5991cd818f43dca3",
-    "node_modules/tera-client-interface/injector.exe": "1b50f0897023ab228dc56a1d60b8b0018238a0803dec8aeec342c95fe74019ea",
+    "node_modules/tera-client-interface/injector.exe": "719d8df276e48d0cd75d07a6a98771809317a921e724017eb68671221bc9b874",
     "node_modules/tera-client-interface/process-listener.js": "b1940a7f2c43561259befb4982dac1fe303dbe1d5a0c40a34eb8573bee257bff",
     "node_modules/tera-client-interface/tera-client-interface.dll": "d7013193d60ee13f3b7df62f210b46ff6d8faecce915acb4afb1c0a277a7ab20",
     "node_modules/tera-client-interface/xigncode-bypass.dll": "f5d8b296e7892537dbc7b36dddf715e8738e41e4e151d4c51872137f9854e1fe",
