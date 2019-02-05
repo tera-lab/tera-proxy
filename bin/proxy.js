@@ -95,7 +95,10 @@ class TeraProxy {
                 }
             }
         );
-        new TeraDllInjector(this.config.bypassXigncode);
+        new TeraDllInjector({
+            interval: this.config.processListenInterval,
+            bypassXigncode: this.config.bypassXigncode
+        });
     }
 
     destructor() {
