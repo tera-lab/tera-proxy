@@ -14,8 +14,7 @@ function loadConfig() {
             "noselfupdate": false,
             "noupdate": false,
             "noupdatelimit": false,
-            "noslstags": false,
-            "bypassXigncode": false
+            "noslstags": false
         };
     }
 

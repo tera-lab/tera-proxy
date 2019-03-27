@@ -33,7 +33,7 @@ function ProxyTagFromLanguage(language) {
         case 'KOR':
             return ' (대리)';
         case 'JPN':
-            return '（Proxy）';
+            return ' (Proxy)';
         case 'TW':
             return '（代理）';
         case 'THA':
@@ -59,8 +59,8 @@ class TeraProxy {
         const ConnectionManager = require('./connectionManager');
         this.connectionManager = new ConnectionManager(moduleFolder);
 
-        const { TeraClientInterfaceServer, TeraProcessListener } = require('tera-client-interface');
-        this.clientInterfaceServer = new TeraClientInterfaceServer('127.0.0.10', 9250,
+        const ClientInterfaceServer = require('tera-client-interface');
+        this.clientInterfaceServer = new ClientInterfaceServer('127.0.0.10', 9250,
             client => {
                 this.onClientInterfaceConnected(client);
             },
@@ -95,11 +95,6 @@ class TeraProxy {
                 }
             }
         );
-        new TeraProcessListener({
-            interval: this.config.processListenInterval,
-            bypassXigncode: this.config.bypassXigncode,
-            bypassMethod: this.config.bypassMethod
-        });
     }
 
     destructor() {
