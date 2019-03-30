@@ -167,7 +167,7 @@ class TeraProxy {
 
                                 const region = RegionFromLanguage(client.info.language);
                                 const platform = (client.info.major_patch <= 27) ? 'classic' : 'pc';
-                                const redirected_server = this.redirect(server.id, server.name, server.ip, server.port, region, region.toLowerCase(), platform, client.info.major_patch, client.info.minor_patch);
+                                const redirected_server = this.redirect(server.id, server.name, server.ip, server.port, region, region.toLowerCase(), platform, client.info.major_patch, client.info.minor_patch, client);
                                 patched_server.ip = redirected_server.ip;
                                 patched_server.port = redirected_server.port;
 
