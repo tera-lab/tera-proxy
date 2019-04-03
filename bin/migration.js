@@ -3,6 +3,24 @@ const fs = require("fs");
 
 // Migrate from old proxy versions
 function ProxyMigration() {
+    // Delete tera-lab mod folder
+    try {
+        const modFolder = path.join(__dirname, '..', 'mods', 'tera-lab');
+
+        try {
+            const modLibFolder = path.join(modFolder, 'lib');
+            fs.readdirSync(modLibFolder).forEach(entry => fs.unlinkSync(path.join(modLibFolder, entry)));
+            fs.rmdirSync(modLibFolder);
+        } catch (e) {
+            // Ignore
+        }
+
+        fs.readdirSync(modFolder).forEach(entry => fs.unlinkSync(path.join(modFolder, entry)));
+        fs.rmdirSync(modFolder);
+    } catch (e) {
+        // Ignore
+    }
+
     // Delete legacy servers folder
     try {
         const serversFolder = path.join(__dirname, 'servers');

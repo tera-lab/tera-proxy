@@ -1,5 +1,5 @@
 @echo off
-title valkyr1e's TERA Proxy powered by Caali
+title Caali's TERA Proxy
 cd /d "%~dp0"
 
 node -e "" > NUL 2> NUL

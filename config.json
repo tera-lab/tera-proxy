@@ -4,6 +4,5 @@
     "devmode": false,
     "noselfupdate": false,
     "noupdate": false,
-    "noupdatelimit": false,
     "noslstags": false
 }
